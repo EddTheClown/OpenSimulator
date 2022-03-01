@@ -15,5 +15,5 @@ int main() {
 
 };//main
 
-	topic: 
+	
 	http://www.maxinmontreal.com/forums/viewtopic.php?f=174&t=23376&p=167074#p167074
