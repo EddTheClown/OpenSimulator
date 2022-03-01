@@ -1,9 +1,7 @@
 # OpenSimulator
 
 #include "Main.h"
-#include <iostream>
-
-	
+#include <iostream>	
 	
 int main() {
 	
