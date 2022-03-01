@@ -3,7 +3,10 @@
 #include "Main.h"
 #include <iostream>
 
+	
+	
 int main() {
+	
 	srand(time(NULL));
 
 	Ambient* simulator = new Ambient;
