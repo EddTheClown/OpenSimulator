@@ -2199,173 +2199,329 @@ void Player::set_MyCardInNumber(){
 void Player::Set_PreflopNumber() {
 
 	if (hand$AA) { PreflopNumber = 1; return; }
-	if (hand$AK) { PreflopNumber = 2; return; }
-	if (hand$AKs) { PreflopNumber = 3; return; }
-	if (hand$AQ) { PreflopNumber = 4; return; }
-	if (hand$AQs) { PreflopNumber = 5; return; }
-	if (hand$AJ) { PreflopNumber = 6; return; }
-	if (hand$AJs) { PreflopNumber = 7; return; }
-	if (hand$AT) { PreflopNumber = 8; return; }
-	if (hand$ATs) { PreflopNumber = 9; return; }
-	if (hand$A9) { PreflopNumber = 10; return; }
-	if (hand$A9s) { PreflopNumber = 11; return; }
-	if (hand$A8) { PreflopNumber = 12; return; }
-	if (hand$A8s) { PreflopNumber = 13; return; }
-	if (hand$A7) { PreflopNumber = 14; return; }
-	if (hand$A7s) { PreflopNumber = 15; return; }
-	if (hand$A6) { PreflopNumber = 16; return; }
-	if (hand$A6s) { PreflopNumber = 17; return; }
-	if (hand$A5) { PreflopNumber = 18; return; }
-	if (hand$A5s) { PreflopNumber = 19; return; }
-	if (hand$A4) { PreflopNumber = 20; return; }
-	if (hand$A4s) { PreflopNumber = 21; return; }
-	if (hand$A3) { PreflopNumber = 22; return; }
-	if (hand$A3s) { PreflopNumber = 23; return; }
-	if (hand$A2) { PreflopNumber = 24; return; }
-	if (hand$A2s) { PreflopNumber = 25; return; }
+	if (hand$AK) {
+		PreflopNumber = 2;
+		if (hand$AKs) { PreflopNumber = 3; } return;
+	}
+	if (hand$AQ) {
+		PreflopNumber = 4;
+		if (hand$AQs) { PreflopNumber = 5; }return;
+	}
+	if (hand$AJ) {
+		PreflopNumber = 6;
+		if (hand$AJs) { PreflopNumber = 7; }return;
+	}
+	if (hand$AT) {
+		PreflopNumber = 8;
+		if (hand$ATs) { PreflopNumber = 9; }return;
+	}
+	if (hand$A9) {
+		PreflopNumber = 10;
+		if (hand$A9s) { PreflopNumber = 11; }return;
+	}
+	if (hand$A8) {
+		PreflopNumber = 12;
+		if (hand$A8s) { PreflopNumber = 13; }return;
+	}
+	if (hand$A7) {
+		PreflopNumber = 14;
+		if (hand$A7s) { PreflopNumber = 15; }return;
+	}
+	if (hand$A6) {
+		PreflopNumber = 16;
+		if (hand$A6s) { PreflopNumber = 17; }return;
+	}
+	if (hand$A5) {
+		PreflopNumber = 18;
+		if (hand$A5s) { PreflopNumber = 19; }return;
+	}
+	if (hand$A4) {
+		PreflopNumber = 20;
+		if (hand$A4s) { PreflopNumber = 21; }return;
+	}
+	if (hand$A3) {
+		PreflopNumber = 22;
+		if (hand$A3s) { PreflopNumber = 23; }return;
+	}
+	if (hand$A2) {
+		PreflopNumber = 24;
+		if (hand$A2s) { PreflopNumber = 25; }return;
+	}
 	if (hand$KK) { PreflopNumber = 26; return; }
-	if (hand$KQ) { PreflopNumber = 27; return; }
-	if (hand$KQs) { PreflopNumber = 28; return; }
-	if (hand$KJ) { PreflopNumber = 29; return; }
-	if (hand$KJs) { PreflopNumber = 30; return; }
-	if (hand$KT) { PreflopNumber = 31; return; }
-	if (hand$KTs) { PreflopNumber = 32; return; }
-	if (hand$K9) { PreflopNumber = 33; return; }
-	if (hand$K9s) { PreflopNumber = 34; return; }
-	if (hand$K8) { PreflopNumber = 35; return; }
-	if (hand$K8s) { PreflopNumber = 36; return; }
-	if (hand$K7) { PreflopNumber = 37; return; }
-	if (hand$K7s) { PreflopNumber = 38; return; }
-	if (hand$K6) { PreflopNumber = 39; return; }
-	if (hand$K6s) { PreflopNumber = 40; return; }
-	if (hand$K5) { PreflopNumber = 41; return; }
-	if (hand$K5s) { PreflopNumber = 42; return; }
-	if (hand$K4) { PreflopNumber = 43; return; }
-	if (hand$K4s) { PreflopNumber = 44; return; }
-	if (hand$K3) { PreflopNumber = 45; return; }
-	if (hand$K3s) { PreflopNumber = 46; return; }
-	if (hand$K2) { PreflopNumber = 47; return; }
-	if (hand$K2s) { PreflopNumber = 48; return; }
+	if (hand$KQ) {
+		PreflopNumber = 27;
+		if (hand$KQs) { PreflopNumber = 28; }return;
+	}
+	if (hand$KJ) {
+		PreflopNumber = 29;
+		if (hand$KJs) { PreflopNumber = 30; }return;
+	}
+	if (hand$KT) {
+		PreflopNumber = 31;
+		if (hand$KTs) { PreflopNumber = 32; }return;
+	}
+	if (hand$K9) {
+		PreflopNumber = 33;
+		if (hand$K9s) { PreflopNumber = 34; }return;
+	}
+	if (hand$K8) {
+		PreflopNumber = 35;
+		if (hand$K8s) { PreflopNumber = 36; }return;
+	}
+	if (hand$K7) {
+		PreflopNumber = 37;
+		if (hand$K7s) { PreflopNumber = 38; }return;
+	}
+	if (hand$K6) {
+		PreflopNumber = 39;
+		if (hand$K6s) { PreflopNumber = 40; }return;
+	}
+	if (hand$K5) {
+		PreflopNumber = 41;
+		if (hand$K5s) { PreflopNumber = 42; }return;
+	}
+	if (hand$K4) {
+		PreflopNumber = 43;
+		if (hand$K4s) { PreflopNumber = 44; }return;
+	}
+	if (hand$K3) {
+		PreflopNumber = 45;
+		if (hand$K3s) { PreflopNumber = 46; }return;
+	}
+	if (hand$K2) {
+		PreflopNumber = 47;
+		if (hand$K2s) { PreflopNumber = 48; }return;
+	}
 	if (hand$QQ) { PreflopNumber = 49; return; }
-	if (hand$QJ) { PreflopNumber = 50; return; }
-	if (hand$QJs) { PreflopNumber = 51; return; }
-	if (hand$QT) { PreflopNumber = 52; return; }
-	if (hand$QTs) { PreflopNumber = 53; return; }
-	if (hand$Q9) { PreflopNumber = 54; return; }
-	if (hand$Q9s) { PreflopNumber = 55; return; }
-	if (hand$Q8) { PreflopNumber = 56; return; }
-	if (hand$Q8s) { PreflopNumber = 57; return; }
-	if (hand$Q7) { PreflopNumber = 58; return; }
-	if (hand$Q7s) { PreflopNumber = 59; return; }
-	if (hand$Q6) { PreflopNumber = 60; return; }
-	if (hand$Q6s) { PreflopNumber = 61; return; }
-	if (hand$Q5) { PreflopNumber = 62; return; }
-	if (hand$Q5s) { PreflopNumber = 63; return; }
-	if (hand$Q4) { PreflopNumber = 64; return; }
-	if (hand$Q4s) { PreflopNumber = 65; return; }
-	if (hand$Q3) { PreflopNumber = 66; return; }
-	if (hand$Q3s) { PreflopNumber = 67; return; }
-	if (hand$Q2) { PreflopNumber = 68; return; }
-	if (hand$Q2s) { PreflopNumber = 69; return; }
+	if (hand$QJ) {
+		PreflopNumber = 50;
+		if (hand$QJs) { PreflopNumber = 51; }return;
+	}
+	if (hand$QT) {
+		PreflopNumber = 52;
+		if (hand$QTs) { PreflopNumber = 53; }return;
+	}
+	if (hand$Q9) {
+		PreflopNumber = 54;
+		if (hand$Q9s) { PreflopNumber = 55; }return;
+	}
+	if (hand$Q8) {
+		PreflopNumber = 56;
+		if (hand$Q8s) { PreflopNumber = 57; }return;
+	}
+	if (hand$Q7) {
+		PreflopNumber = 58;
+		if (hand$Q7s) { PreflopNumber = 59; }return;
+	}
+	if (hand$Q6) {
+		PreflopNumber = 60;
+		if (hand$Q6s) { PreflopNumber = 61; }return;
+	}
+	if (hand$Q5) {
+		PreflopNumber = 62;
+		if (hand$Q5s) { PreflopNumber = 63; }return;
+	}
+	if (hand$Q4) {
+		PreflopNumber = 64;
+		if (hand$Q4s) { PreflopNumber = 65; }return;
+	}
+	if (hand$Q3) {
+		PreflopNumber = 66;
+		if (hand$Q3s) { PreflopNumber = 67; }return;
+	}
+	if (hand$Q2) {
+		PreflopNumber = 68;
+		if (hand$Q2s) { PreflopNumber = 69; }return;
+	}
 	if (hand$JJ) { PreflopNumber = 70; return; }
-	if (hand$JT) { PreflopNumber = 71; return; }
-	if (hand$JTs) { PreflopNumber = 72; return; }
-	if (hand$J9) { PreflopNumber = 73; return; }
-	if (hand$J9s) { PreflopNumber = 74; return; }
-	if (hand$J8) { PreflopNumber = 75; return; }
-	if (hand$J8s) { PreflopNumber = 76; return; }
-	if (hand$J7) { PreflopNumber = 77; return; }
-	if (hand$J7s) { PreflopNumber = 78; return; }
-	if (hand$J6) { PreflopNumber = 79; return; }
-	if (hand$J6s) { PreflopNumber = 80; return; }
-	if (hand$J5) { PreflopNumber = 81; return; }
-	if (hand$J5s) { PreflopNumber = 82; return; }
-	if (hand$J4) { PreflopNumber = 83; return; }
-	if (hand$J4s) { PreflopNumber = 84; return; }
-	if (hand$J3) { PreflopNumber = 85; return; }
-	if (hand$J3s) { PreflopNumber = 86; return; }
-	if (hand$J2) { PreflopNumber = 87; return; }
-	if (hand$J2s) { PreflopNumber = 88; return; }
+	if (hand$JT) {
+		PreflopNumber = 71;
+		if (hand$JTs) { PreflopNumber = 72; }return;
+	}
+	if (hand$J9) {
+		PreflopNumber = 73;
+		if (hand$J9s) { PreflopNumber = 74; }return;
+	}
+	if (hand$J8) {
+		PreflopNumber = 75;
+		if (hand$J8s) { PreflopNumber = 76; }return;
+	}
+	if (hand$J7) {
+		PreflopNumber = 77;
+		if (hand$J7s) { PreflopNumber = 78; }return;
+	}
+	if (hand$J6) {
+		PreflopNumber = 79;
+		if (hand$J6s) { PreflopNumber = 80; }return;
+	}
+	if (hand$J5) {
+		PreflopNumber = 81;
+		if (hand$J5s) { PreflopNumber = 82; }return;
+	}
+	if (hand$J4) {
+		PreflopNumber = 83;
+		if (hand$J4s) { PreflopNumber = 84; }return;
+	}
+	if (hand$J3) {
+		PreflopNumber = 85;
+		if (hand$J3s) { PreflopNumber = 86; }return;
+	}
+	if (hand$J2) {
+		PreflopNumber = 87;
+		if (hand$J2s) { PreflopNumber = 88; }return;
+	}
 	if (hand$TT) { PreflopNumber = 89; return; }
-	if (hand$T9) { PreflopNumber = 90; return; }
-	if (hand$T9s) { PreflopNumber = 91; return; }
-	if (hand$T8) { PreflopNumber = 92; return; }
-	if (hand$T8s) { PreflopNumber = 93; return; }
-	if (hand$T7) { PreflopNumber = 94; return; }
-	if (hand$T7s) { PreflopNumber = 95; return; }
-	if (hand$T6) { PreflopNumber = 96; return; }
-	if (hand$T6s) { PreflopNumber = 97; return; }
-	if (hand$T5) { PreflopNumber = 98; return; }
-	if (hand$T5s) { PreflopNumber = 99; return; }
-	if (hand$T4) { PreflopNumber = 100; return; }
-	if (hand$T4s) { PreflopNumber = 101; return; }
-	if (hand$T3) { PreflopNumber = 102; return; }
-	if (hand$T3s) { PreflopNumber = 103; return; }
-	if (hand$T2) { PreflopNumber = 104; return; }
-	if (hand$T2s) { PreflopNumber = 105; return; }
+	if (hand$T9) {
+		PreflopNumber = 90;
+		if (hand$T9s) { PreflopNumber = 91; }return;
+	}
+	if (hand$T8) {
+		PreflopNumber = 92;
+		if (hand$T8s) { PreflopNumber = 93; }return;
+	}
+	if (hand$T7) {
+		PreflopNumber = 94;
+		if (hand$T7s) { PreflopNumber = 95; }return;
+	}
+	if (hand$T6) {
+		PreflopNumber = 96;
+		if (hand$T6s) { PreflopNumber = 97; }return;
+	}
+	if (hand$T5) {
+		PreflopNumber = 98;
+		if (hand$T5s) { PreflopNumber = 99; }return;
+	}
+	if (hand$T4) {
+		PreflopNumber = 100;
+		if (hand$T4s) { PreflopNumber = 101; }return;
+	}
+	if (hand$T3) {
+		PreflopNumber = 102;
+		if (hand$T3s) { PreflopNumber = 103; }return;
+	}
+	if (hand$T2) {
+		PreflopNumber = 104;
+		if (hand$T2s) { PreflopNumber = 105; }return;
+	}
 	if (hand$99) { PreflopNumber = 106; return; }
-	if (hand$98) { PreflopNumber = 107; return; }
-	if (hand$98s) { PreflopNumber = 108; return; }
-	if (hand$97) { PreflopNumber = 109; return; }
-	if (hand$97s) { PreflopNumber = 110; return; }
-	if (hand$96) { PreflopNumber = 111; return; }
-	if (hand$96s) { PreflopNumber = 112; return; }
-	if (hand$95) { PreflopNumber = 113; return; }
-	if (hand$95s) { PreflopNumber = 114; return; }
-	if (hand$94) { PreflopNumber = 115; return; }
-	if (hand$94s) { PreflopNumber = 116; return; }
-	if (hand$93) { PreflopNumber = 117; return; }
-	if (hand$93s) { PreflopNumber = 118; return; }
-	if (hand$92) { PreflopNumber = 119; return; }
-	if (hand$92s) { PreflopNumber = 120; return; }
+	if (hand$98) {
+		PreflopNumber = 107;
+		if (hand$98s) { PreflopNumber = 108; }return;
+	}
+	if (hand$97) {
+		PreflopNumber = 109;
+		if (hand$97s) { PreflopNumber = 110; }return;
+	}
+	if (hand$96) {
+		PreflopNumber = 111;
+		if (hand$96s) { PreflopNumber = 112; }return;
+	}
+	if (hand$95) {
+		PreflopNumber = 113;
+		if (hand$95s) { PreflopNumber = 114; }return;
+	}
+	if (hand$94) {
+		PreflopNumber = 115;
+		if (hand$94s) { PreflopNumber = 116; }return;
+	}
+	if (hand$93) {
+		PreflopNumber = 117;
+		if (hand$93s) { PreflopNumber = 118; }return;
+	}
+	if (hand$92) {
+		PreflopNumber = 119;
+		if (hand$92s) { PreflopNumber = 120; }return;
+	}
 	if (hand$88) { PreflopNumber = 121; return; }
-	if (hand$87) { PreflopNumber = 122; return; }
-	if (hand$87s) { PreflopNumber = 123; return; }
-	if (hand$86) { PreflopNumber = 124; return; }
-	if (hand$86s) { PreflopNumber = 125; return; }
-	if (hand$85) { PreflopNumber = 126; return; }
-	if (hand$85s) { PreflopNumber = 127; return; }
-	if (hand$84) { PreflopNumber = 128; return; }
-	if (hand$84s) { PreflopNumber = 129; return; }
-	if (hand$83) { PreflopNumber = 130; return; }
-	if (hand$83s) { PreflopNumber = 131; return; }
-	if (hand$82) { PreflopNumber = 132; return; }
-	if (hand$82s) { PreflopNumber = 133; return; }
+	if (hand$87) {
+		PreflopNumber = 122;
+		if (hand$87s) { PreflopNumber = 123; }return;
+	}
+	if (hand$86) {
+		PreflopNumber = 124;
+		if (hand$86s) { PreflopNumber = 125; }return;
+	}
+	if (hand$85) {
+		PreflopNumber = 126;
+		if (hand$85s) { PreflopNumber = 127; }return;
+	}
+	if (hand$84) {
+		PreflopNumber = 128;
+		if (hand$84s) { PreflopNumber = 129; }return;
+	}
+	if (hand$83) {
+		PreflopNumber = 130;
+		if (hand$83s) { PreflopNumber = 131; }return;
+	}
+	if (hand$82) {
+		PreflopNumber = 132;
+		if (hand$82s) { PreflopNumber = 133; }return;
+	}
 	if (hand$77) { PreflopNumber = 134; return; }
-	if (hand$76) { PreflopNumber = 135; return; }
-	if (hand$76s) { PreflopNumber = 136; return; }
-	if (hand$75) { PreflopNumber = 137; return; }
-	if (hand$75s) { PreflopNumber = 138; return; }
-	if (hand$74) { PreflopNumber = 139; return; }
-	if (hand$74s) { PreflopNumber = 140; return; }
-	if (hand$73) { PreflopNumber = 141; return; }
-	if (hand$73s) { PreflopNumber = 142; return; }
-	if (hand$72) { PreflopNumber = 143; return; }
-	if (hand$72s) { PreflopNumber = 144; return; }
+	if (hand$76) {
+		PreflopNumber = 135;
+		if (hand$76s) { PreflopNumber = 136; }return;
+	}
+	if (hand$75) {
+		PreflopNumber = 137;
+		if (hand$75s) { PreflopNumber = 138; }return;
+	}
+	if (hand$74) {
+		PreflopNumber = 139;
+		if (hand$74s) { PreflopNumber = 140; }return;
+	}
+	if (hand$73) {
+		PreflopNumber = 141;
+		if (hand$73s) { PreflopNumber = 142; }return;
+	}
+	if (hand$72) {
+		PreflopNumber = 143;
+		if (hand$72s) { PreflopNumber = 144; }return;
+	}
 	if (hand$66) { PreflopNumber = 145; return; }
-	if (hand$65) { PreflopNumber = 146; return; }
-	if (hand$65s) { PreflopNumber = 147; return; }
-	if (hand$64) { PreflopNumber = 148; return; }
-	if (hand$64s) { PreflopNumber = 149; return; }
-	if (hand$63) { PreflopNumber = 150; return; }
-	if (hand$63s) { PreflopNumber = 151; return; }
-	if (hand$62) { PreflopNumber = 152; return; }
-	if (hand$62s) { PreflopNumber = 153; return; }
+	if (hand$65) {
+		PreflopNumber = 146;
+		if (hand$65s) { PreflopNumber = 147; }return;
+	}
+	if (hand$64) {
+		PreflopNumber = 148;
+		if (hand$64s) { PreflopNumber = 149; }return;
+	}
+	if (hand$63) {
+		PreflopNumber = 150;
+		if (hand$63s) { PreflopNumber = 151; }return;
+	}
+	if (hand$62) {
+		PreflopNumber = 152;
+		if (hand$62s) { PreflopNumber = 153; }return;
+	}
 	if (hand$55) { PreflopNumber = 154; return; }
-	if (hand$54) { PreflopNumber = 155; return; }
-	if (hand$54s) { PreflopNumber = 156; return; }
-	if (hand$53) { PreflopNumber = 157; return; }
-	if (hand$53s) { PreflopNumber = 158; return; }
-	if (hand$52) { PreflopNumber = 159; return; }
-	if (hand$52s) { PreflopNumber = 160; return; }
+	if (hand$54) {
+		PreflopNumber = 155;
+		if (hand$54s) { PreflopNumber = 156; }return;
+	}
+	if (hand$53) {
+		PreflopNumber = 157;
+		if (hand$53s) { PreflopNumber = 158; }return;
+	}
+	if (hand$52) {
+		PreflopNumber = 159;
+		if (hand$52s) { PreflopNumber = 160; }return;
+	}
 	if (hand$44) { PreflopNumber = 161; return; }
-	if (hand$43) { PreflopNumber = 162; return; }
-	if (hand$43s) { PreflopNumber = 163; return; }
-	if (hand$42) { PreflopNumber = 164; return; }
-	if (hand$42s) { PreflopNumber = 165; return; }
+	if (hand$43) {
+		PreflopNumber = 162;
+		if (hand$43s) { PreflopNumber = 163; }return;
+	}
+	if (hand$42) {
+		PreflopNumber = 164;
+		if (hand$42s) { PreflopNumber = 165; }return;
+	}
 	if (hand$33) { PreflopNumber = 166; return; }
-	if (hand$32) { PreflopNumber = 167; return; }
-	if (hand$32s) { PreflopNumber = 168; return; }
+	if (hand$32) {
+		PreflopNumber = 167;
+		if (hand$32s) { PreflopNumber = 168; }return;
+	}
 	if (hand$22) { PreflopNumber = 169; return; }
 
 
