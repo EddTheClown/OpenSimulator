@@ -1,3 +1,5 @@
+to use just create new empty project console and add all files.
+
 # OpenSimulator
 
 #include "Main.h"
