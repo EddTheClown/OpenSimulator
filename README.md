@@ -1,11 +1,6 @@
 to use just create new empty project console and add all files.
 
 # OpenSimulator
-
-#include "Main.h"
-#include <iostream>	
-	
-int main() {
 	
 	srand(time(NULL));
 
@@ -15,7 +10,6 @@ int main() {
 	delete simulator;
 	
 
-};//main
 
 	
 	http://www.maxinmontreal.com/forums/viewtopic.php?f=174&t=23376&p=167074#p167074
