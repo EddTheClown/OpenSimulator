@@ -1537,8 +1537,7 @@ int Player::set_decision2() {
 	return 0;
 };
 
-//this have PT leak tracker exatly at center of green area, just to not have a random opponent
-//it's not a winner and it doesn't matter. is just to not have a random opponent.
+//example
 int Player::set_decision3() {
 	//6max
 
