@@ -1,17 +1,19 @@
 #pragma once
 #include "Main.h"
-
 using namespace std;
 
-#define Random (rand()%100)>=50
+#define Random (rand()%100)
 #define ToCall (AmountToCall / *BBsize)
 
+#define StackSize (mystack / *BBsize)
+
+//constructor
 Player::Player() {
-	//constructor
+
 
 };
 
-
+//reset all var at the begin of hand
 void Player::handreset() {
 	ResetCountCard();
 
@@ -65,9 +67,10 @@ void Player::handreset() {
 	myprize = 0;
 	prwin = 0;
 	prlos = 0;
-
+	Opponents = 0;
 	NumberOfSuit = 0;
 	PreflopNumber = 0;
+	Pot = 0;
 
 	PairInHand = false;
 	HaveStraightFlush = false;
@@ -88,6 +91,7 @@ void Player::handreset() {
 
 	winner = false;
 
+	Situation = 0;
 	s = false;
 
 
@@ -100,37 +104,55 @@ void Player::handreset() {
 
 };
 
-
+//update all the necessary var to make a decision
 void Player::Update_TableInformation() {
+	//count the cards
 	CountCard();
+	//set situation based on bot actions
+	Situation = set_situation();
+
+	//prov var (put in a function later)
+	Opponents = (*ActivePlayer - 1);
+	Pot = (*PotSize / *BBsize );
+
+	//set stack and bets var
 	set_AmountToCall();
 	set_MaxOpponentStackSize();
 	set_effective_stack();
-	set_mycard();
 	set_Stacklevel();
+
+	//set cards and position
+	set_mycard();
 	set_position();
-	if (bprwin) { calc_prwin(); }
+
+	//choose if opponent have to calc prwin whth bool opponentprwin in player.h
+	if (myname != "Player0") bprwin = opponentprwin;
+
+	//calc prwin if active in player.h
+	if (bprwin) {
+		prwin = calc_prwin();
+		prlos = 1 - prwin; 
+	}
+	
 
 
 };
 
+//check the betsize and calc the difference from mybet and betsize for call
 void Player::set_AmountToCall() {
 	currentbet = mybet;
-
 	AmountToCall = *BetSize - currentbet;
 	if (AmountToCall >= mystack) { AmountToCall = mystack; };
 
 };
-void Player::set_TotalInvested() {
 
-
-};
+//count the max and the min stack of opponents
 void Player::set_MaxOpponentStackSize() {
 	MaxBet = 0;
 	MaxOpponentStackSize = 0;
 	MinOpponentStackSize = 999999999;
 
-
+	//set max e min stacks
 	for (int i = (*nPlayers - 1); i >= 0; i--) {
 		//if (*PlayersStack[i] == mystack) { continue; }
 		if (*PlayersStack[i] >= MaxOpponentStackSize && *PlayersState[i] != State::Fold) {
@@ -139,18 +161,24 @@ void Player::set_MaxOpponentStackSize() {
 		if (*PlayersStack[i] <= MinOpponentStackSize && *PlayersState[i] != State::Fold) { MinOpponentStackSize = *PlayersStack[i]; };
 	}
 };
+
+//set opponents at the table (incomplete)
 void Player::set_OpponentsAtTable() {
 
 	OpponentsAtTable = (*nPlayers - 1);
 
 
 };
+
+//save the starting stack at the begin of hand
 void Player::set_StartingStack() {
 
 	StartingStack = mystack;
 
 
 };
+
+//calc my hand strength at the end of hand
 int  Player::set_HandStrength() {
 	if (mystate == State::Fold) { HandStrength = -100000; return HandStrength; }
 	/*
@@ -182,7 +210,7 @@ int  Player::set_HandStrength() {
 
 };
 
-
+//set the stack level in BB
 void Player::set_Stacklevel() {
 
 	if (mystack <= (5 * *BBsize)) { StackLevel = 1; return; };
@@ -199,6 +227,8 @@ void Player::set_Stacklevel() {
 	if (mystack <= (100 * *BBsize)) { StackLevel = 12; return; };
 	if (mystack > (100 * *BBsize)) { StackLevel = 13; return; };
 };
+
+//update the knowing card based on bet round
 void Player::set_mycard() {
 
 	switch (*BetRound) {
@@ -206,82 +236,62 @@ void Player::set_mycard() {
 	case 1:
 		mycard[0] = *MyCards[0];
 		mycard[1] = *MyCards[1];
-		Set_PreflopNumber();
+		if (bprwin) Set_PreflopNumber();
+		mycards = mycard[0] + mycard[1];
 		break;
 	case 2:
 		mycard[2] = *MyCards[2];
 		mycard[3] = *MyCards[3];
 		mycard[4] = *MyCards[4];
+		mycards = mycard[0] + mycard[1] + mycard[2] + mycard[3] + mycard[4] ;
 		break;
 	case 3:
 		mycard[5] = *MyCards[5];
+		mycards = mycard[0] + mycard[1] + mycard[2] + mycard[3] + mycard[4] +mycard[5];
+
 		break;
 	case 4:
 		mycard[6] = *MyCards[6];
+		mycards = mycard[0] + mycard[1]+ mycard[2] + mycard[3] + mycard[4] + mycard[5] + mycard[6];
+		break;
+	case 5:
+		mycard[6] = *MyCards[6];
+		mycards = mycard[0] + mycard[1] + mycard[2] + mycard[3] + mycard[4] + mycard[5] + mycard[6];
 		break;
 	}
 
 };
-void Player::set_Pocket_Card(string card1, string card2) {
 
-	mycard[0] = card1;
-	mycard[1] = card2;
-
-};
-void Player::set_Flop_Card(string card1, string card2, string card3) {
-
-
-	mycard[2] = card1;
-	mycard[3] = card2;
-	mycard[4] = card3;
-};
-void Player::set_Turn_Card(string card1) {
-
-	mycard[5] = card1;
-
-};
-void Player::set_River_Card(string card1) {
-	mycard[6] = card1;
-};
-void Player::set_All_Card(string card1, string card2, string card3, string card4, string card5, string card6, string card7) {
-
-	mycard[0] = card1;
-	mycard[1] = card2;
-	mycard[2] = card3;
-	mycard[3] = card4;
-	mycard[4] = card5;
-	mycard[5] = card6;
-	mycard[6] = card7;
-}
-
+//set positional var
 void Player::set_position() {
 
 	if (myposition == *SBPosition) { inSmallBlind = true; Position = Position::SB; return; };
 	if (myposition == *BBPosition) { inBigBlind = true;  Position = Position::BB; return; };
 	if (myposition == *ButtonPosition) { inButton = true; Position = Position::Button;  return; };
 	if (myposition == *COPosition) { inCutOff = true; Position = Position::CutOff;  return; };
-	if (myposition == *MiddlePosition3) { inMiddlePosition = true; Position = Position::Middle;  return; };
-	if (myposition == *MiddlePosition2) { inMiddlePosition = true; Position = Position::Middle;  return; };
-	if (myposition == *MiddlePosition1) { inMiddlePosition = true; Position = Position::Middle;  return; };
-	if (myposition == *EarlyPosition1) { inEarlyPosition = true; Position = Position::Early;  return; };
-	if (myposition == *EarlyPosition2) { inEarlyPosition = true; Position = Position::Early;  return; };
+	if (myposition == *MiddlePosition3) { inMiddlePosition = true; Position = Position::Middle3;  return; };
+	if (myposition == *MiddlePosition2) { inMiddlePosition = true; Position = Position::Middle2;  return; };
+	if (myposition == *MiddlePosition1) { inMiddlePosition = true; Position = Position::Middle1;  return; };
+	if (myposition == *EarlyPosition1) { inEarlyPosition = true; Position = Position::Early1;  return; };
+	if (myposition == *EarlyPosition2) { inEarlyPosition = true; Position = Position::Early2;  return; };
 
 
 };
+//reset my bets var
 void Player::reset_mybet() {
 
  	mybet = 0;
 	currentbet = 0;
 
 };
+//reset status var
 void Player::reset_mystate() {
 
 	if (mystate != State::Allin && mystate != State::Call_Allin && mystate != State::Fold && mystate != State::Forced_Allin) {
 		mystate = State::None;
 	};
 };
-
-
+//reset all cards var
 void Player::ResetCountCard() {
 	nA = 0;
 	nK = 0;
@@ -587,14 +597,17 @@ void Player::ResetCountCard() {
 	hand$22 = false;
 
 };
+//count cards and symbols
 void Player::CountCard() {
 	ResetCountCard();
 	int number = -1;
 	string Card0 = "";
 	string Card1 = "";
 
+
 	for (int i = 0; i < 7; i++) {
 		if (mycard[i] == "") { break; }
+
 		switch (mycard[i][1]) {
 		case 'c':
 			switch (mycard[i][0]) {
@@ -1016,7 +1029,7 @@ void Player::CountCard() {
 		}
 		else if (hand$3 && hand$2 ) {
 		if (s) { hand$3s = true; }
-			hand$32 = true; if (s) { hand$32 = true; }
+			hand$32 = true; if (s) { hand$32s = true; }
 		};
 		
 	};
@@ -1034,6 +1047,7 @@ void Player::CountCard() {
 
 
 };
+//take the prize at the end of hand and add to the stack
 void Player::TakePrize(int _prize) {
 
 	mystack += _prize;
@@ -1041,23 +1055,14 @@ void Player::TakePrize(int _prize) {
 
 
 
-
+//get al know card to string
 string Player::get_mycards() {	
 
-	mycards += mycard[0];
-	mycards += mycard[1];
-	mycards += " ";
-	mycards += mycard[2];
-	mycards += mycard[3];
-	mycards += mycard[4];
-	mycards += " ";
-	mycards += mycard[5];
-	mycards += " ";
-	mycards += mycard[6];
 
 	return mycards;
 };
 
+//update stack var (also invested)
 void Player::UpdateMyStack() {
 
 	switch (*BetRound) {
@@ -1085,6 +1090,7 @@ void Player::UpdateMyStack() {
 	mystack = StartingStack - TotalInvested;
 };
 
+//perform fold action
 void Player::do_Fold() {
 	if (AmountToCall == 0 && *BetRound == 1 && inBigBlind) { do_Check(); return; };
 	if (AmountToCall == 0 && *BetRound > 1) { do_Check(); return; };
@@ -1095,6 +1101,7 @@ void Player::do_Fold() {
 
 
 };
+//perform check action
 void Player::do_Check() {
 	if (AmountToCall > 0) { do_Fold(); return; }
 
@@ -1105,6 +1112,7 @@ void Player::do_Check() {
 
 
 };
+//perform call action
 void Player::do_Call() {
 	if (AmountToCall == 0) { do_Check(); return; };
 	if (AmountToCall >= mystack) { do_Allin(); return; }
@@ -1114,29 +1122,31 @@ void Player::do_Call() {
 	BotLastAction = State::Call;
 
 };
+//perform raise action
 void Player::do_Raise() {
 	int RandomNumber = rand() % 6;
 
 	if (*PlayersInHand == 1) { do_Call(); return; }
 	if (mystack <= 15 * *BBsize) { do_Allin(); return; }
-
 	if (AmountToCall >= mystack) { do_Allin(); return; }
-	if (mystate == State::Raise) { do_Allin(); return; }
+	//if (*BetRound == 1 && BotLastAction == State::Raise && ToCall >= 10) { do_Allin(); return; }
 
 	if (AmountToCall > 0 && AmountToCall < *SBsize) { do_Call(); return; }
 
 	if (*BetRound == 1) {
+
+		myraise = *BetSize * 3;
+
 		if ((AmountToCall / *BBsize) <= 1 && *Calls == 0) { myraise = *BBsize * 3; }
 		if ((AmountToCall / *BBsize) <= 1 && *Calls > 0) { myraise = (*BBsize * 3) + (*BBsize * *Calls); }
 
-		myraise = *BetSize * 3;
+		
 	}
 	else {
-		if (AmountToCall > 0) { myraise = *BetSize * 3; }
-		else {
+		if (*BetSize == 0) {
 			switch (RandomNumber) {
 			case 0:
-				myraise = 0.75 * * PotSize;
+				myraise = 0.75 * *PotSize;
 				break;
 			case 1:
 				myraise = 0.80 * *PotSize;
@@ -1153,29 +1163,33 @@ void Player::do_Raise() {
 			case 5:
 				myraise = *PotSize;
 				break;
-			}
+			};
 		}
+		else { myraise = *BetSize * 3; };
 	}
 
+	if (myname == "Player0" && *Handnumber == 1) {
 
+		cout << "";
+	}
 
 
 	/*
 	if (myname == "Player0" && ManualPlay) { cout << "\nEnter your raise\n"; cin >> myraise; }
 	else {
 		//betsize logic
-		if (Random) { myraise = 0.5 * *PotSize; }
+		if (Random) { myraise = 0.5 * *Pot; }
 		else {
-			if (Random) { myraise = *PotSize; }
-			else { myraise = 0.75 * *PotSize; }
+			if (Random) { myraise = *Pot; }
+			else { myraise = 0.75 * *Pot; }
 		};
 
 
 	};
 	*/
 
+	
 	if (MaxBet == 0) { do_Call(); return; }
-
 
 	if (myraise < AmountToCall) { do_Fold(); return; };
 
@@ -1203,20 +1217,22 @@ void Player::do_Raise() {
 
 
 };
+//perform allin action
 void Player::do_Allin() {
-	//if (myname == "Player1" && *Handnumber == 80) { getchar(); }
+
 
 
 	myraise = mystack;
 	mystate = State::Allin;
-
+	BotLastAction = State::Raise;
 	mybet += myraise;
 
 
 
-	if (AmountToCall >= mystack) { mystate = State::Call_Allin; }
+	if (AmountToCall >= mystack) { mystate = State::Call_Allin; BotLastAction = State::Call; }
 
 };
+//put ante in the pot
 void Player::post_ANTE() {
 	mybet = *ANTEsize;
 
@@ -1225,6 +1241,7 @@ void Player::post_ANTE() {
 	UpdateMyStack();
 
 };
+//put blinds in the pot
 void Player::post_Blinds() {
 
 
@@ -1236,35 +1253,85 @@ void Player::post_Blinds() {
 	UpdateMyStack();
 };
 
-
-void Player::calc_prwin() {
+//if true in player.h calc the prwin 
+double Player::calc_prwin() {
 
 	prwin_calcolator* calc = new prwin_calcolator;
 
 	switch(*BetRound){
-	case 1:
-		prwin = calc->Preflop_precalc_prwin(PreflopNumber, *ActivePlayer);
-		prlos = 1 - prwin;
-		delete calc;
-		return;
+		case 1:
+			prwin = calc->Preflop_precalc_prwin(PreflopNumber, *ActivePlayer);
+			prlos = 1 - prwin;
+			delete calc;
+			return prwin;
+		}
+	
+	prwin = calc->calc_prwin(mycard[0], mycard[1], mycard[2], mycard[3], mycard[4], mycard[5], mycard[6], *ActivePlayer, prwin_iterations);
+	delete calc;
+	return prwin;
+};
+
+//convert enumeration State in string
+string Player::State_to_String(State action) {
+
+	switch (action) {
+
+	case State::Fold:
+		return "Fold";
+	case State::Check:
+		return "Check";
+	case State::Call:
+		return "Call";
+	case State::Raise:
+		return "Raise";
+	case State::Blinds:
+		return "Blinds";
+	case State::None:
+		return "None";
+	case State::Bet:
+		return "Bet";
+	case State::Allin:
+		return "Allin";
+	case State::Call_Allin:
+		return "Call_Allin";
+	case State::Forced_Allin:
+		return "Forced_Allin";
+	case State::null:
+		return "null";
+	case State::Out:
+		return "Out";
+
+
 	}
 
-	prwin = calc->calc_prwin(mycard[0], mycard[1], mycard[2], mycard[3], mycard[4], mycard[5], mycard[6], *ActivePlayer, prwin_iterations);
-	prlos = 1 - prwin;
-	delete calc;
+	return "error";
 };
+//if true in player.h write player the log in txt 
 void Player::pDebug() {
-	ofstream scrivi;
-	if (bDebug && myname == "Player0") {
+
+	if (bDebug && myname == "Player0" && writehand == true) {
+		ofstream scrivi;
+		scrivi.precision(2);
+
 		scrivi.open("Player0_LOG.txt", ios::app);
 		scrivi << "\nHANDNUMBER: " << *Handnumber;
-		scrivi << "\nbetround: " << *BetRound << endl;
+		scrivi << "\nbetround: " << *BetRound<<endl;
 
-		scrivi << "\n" << myname << " (" << (int)mystate << " " << mybet << ") " << " " << get_mycards();
+		scrivi << "if (*BetRound == " << *BetRound << " && ";
+		scrivi << "AmountToCall == " << ToCall << " && ";
+		scrivi << "*ActivePlayer == " << *ActivePlayer<< " && ";
+		scrivi << "BotLastAction == State::" << State_to_String(BotLastAction) << " && ";
+		scrivi << "prwin >= " << prwin;
+		scrivi << ")return true;\n";
 
-		scrivi << "\nprwin_iterations: " << prwin_iterations;
+		scrivi << "\n" << myname << " (" << State_to_String(mystate) << " " << mybet << ") " << " " << get_mycards();
 		scrivi << "\nprwin: " << prwin;
-		scrivi << "\nprlos: " << prlos;
+
+
+		scrivi << "\nStack: " << mystack / *BBsize;
+		scrivi << "\nPot(bb): " << Pot;
+		scrivi << "\nAmountToCall: " << ToCall;
+		scrivi << "\nTotalInvested: " << TotalInvested / *BBsize << endl;
 		scrivi << "\nPlayersInHand= " << *PlayersInHand;
 		scrivi << "\nActivePlayers= " << *ActivePlayer;
 
@@ -1276,16 +1343,14 @@ void Player::pDebug() {
 		scrivi << "\n inMiddlePosition: " << inMiddlePosition;
 		scrivi << "\n inEarlyPosition: " << inEarlyPosition << endl;
 
-		scrivi << "\n BotLastAction: " << (int)BotLastAction;
-		scrivi << "\n BotLastPreflopAction: " << (int)BotLastPreflopAction;
-		scrivi << "\n BotLastFlopAction: " << (int)BotLastFlopAction;
-		scrivi << "\n BotLastTurnAction: " << (int)BotLastTurnAction;
-		scrivi << "\n BotLastRiverAction: " << (int)BotLastRiverAction << endl;
+		scrivi << "\nbetround: " << *BetRound;
+		scrivi << "\n BotLastAction: " << State_to_String(BotLastAction);
+		scrivi << "\n BotLastPreflopAction: " << State_to_String(BotLastPreflopAction);
+		scrivi << "\n BotLastFlopAction: " << State_to_String(BotLastFlopAction);
+		scrivi << "\n BotLastTurnAction: " << State_to_String(BotLastTurnAction);
+		scrivi << "\n BotLastRiverAction: " << State_to_String(BotLastRiverAction) << endl;
 		
 
-		scrivi << "\nAmountToCall: " << AmountToCall / *BBsize;
-		scrivi << "\nPotSize: " << *PotSize / *BBsize;
-		scrivi << "\nStack: " << mystack / *BBsize << endl;
 
 		scrivi << "\nOpponentsAtTable: " << OpponentsAtTable;
 		scrivi << "\nMaxStackSize: " << MaxOpponentStackSize;
@@ -1307,6 +1372,8 @@ void Player::pDebug() {
 
 	}
 };
+
+//set effective stack
 void Player::set_effective_stack() {
 
 	if (mystack > MaxOpponentStackSize) {
@@ -1318,48 +1385,45 @@ void Player::set_effective_stack() {
 
 };
 
+//make decision  at my turn
 void Player::MyTurn(const Player _p[]) {
-
+	//in this case hero is player0
+		decision = 0;
 
 	Update_TableInformation();
-	
-
-	
-	
 
 
-	
-	
+
+	//post blinds
 	if (myposition == *BBPosition && mystate == State::null) { post_Blinds(); return; }
 	if (myposition == *SBPosition && mystate == State::null) { post_Blinds(); return; }
 	if (TotalInvested > mystack) { do_Allin(); UpdateMyStack();; return; }
 
 
 
-	decision = 0;
 	if (myname == "Player0" && ManualPlay) {
 		cout << "Not avaible, Work in progress.. any key to continue in automatic.\n";
 		ManualPlay = false;
-		
+
 		//cout << "\nEnter your decision: 0= Fold , 1= Check , 2=Call , 3=Raise , 4= Allin\n"; 
 	}
-
-
 	//myname == "Player0"
-	if (true) {
-		decision = set_decision();
-	}
-	else {
+	
+	//read in set_decision() for more information
+	if (myname == "Player0") decision = set_decision3();
+	else
+
+	{
+		//choose here the opponents logic exaples:
+		//if (myname == "Player1") decision = myfunction();
+		//if (myname == "Player2") decision = fish();
+		//if (myname == "Player3") if rand() decision = solid();
+
 		decision = rand() % 4;
-	};
+	}
 
 
-
-
-
-
-
-
+	//perform decision
 	switch (decision) {
 
 	case 0:
@@ -1379,6 +1443,11 @@ void Player::MyTurn(const Player _p[]) {
 		break;
 
 	}
+	
+	//write log if accive in player.h
+	if (bDebug) { pDebug(); }
+
+	//set bot last actions
 	switch (*BetRound) {
 	case 1:
 		BotLastPreflopAction = BotLastAction;
@@ -1395,28 +1464,94 @@ void Player::MyTurn(const Player _p[]) {
 
 	}
 
-	if (bDebug) { pDebug(); }
-
+	
+	//update stack and invested var
 	UpdateMyStack();
 
 
 
 };
 
-
+//some example to write logic
 int Player::set_decision() {
+	/*
+	I write here some additional information and examples:
+	------------------------------------------------------------------
+	if (this) {
+	return 0; // fold
+	return 1; // check
+	return 2; // call
+	return 3; // raise
+	return 4; // allin
+	}
+	------------------------------------------------------------------
+	all var in player.h at this point are update and can be used to make a decision
+	if you usa a pointer var like BetRound, you have to put a '*' before. (*BetRound)
+	------------------------------------------------------------------
+	*BetRound
+	*Raises
+	*Calls 
+	TotalInvested
+	prwin
+	ecc..
+	------------------------------------------------------------------
+	you can make your macro like this (look at the top first lines of player.cpp)
+
+	ToCall is a macro, it mean AmountToCall
+	Random is a macro ,a number from 0 to 100
+	StackSize is a macro , it mean StackSize
+	------------------------------------------------------------------
+	if you set writehand false in player.h and single simulation true in ambient.h
+	setting writehand true in a condition here it will only write those hands in the hh. (the others do not)
+
+	if (*BetRound == 1 && ToCall <=5 ) {writehand = true; ...} 
+	------------------------------------------------------------------
+	bot last actions are enumeration , you can use in this way
+
+	if (BotLastAction == State::Call){..}
+
+	of with switch if you prefer (faster). 
+	switch (BotLastAction)
+		case State::Call:
+		...
+		break;
+
+	------------------------------------------------------------------
+	if bdebug is active in player.h a log is written in player0log.txt
+	------------------------------------------------------------------
+	at the moment the betsize is random, from 70 to 100 of pot. you can modify in do_raise() function.
+	I have not implemented this better because if it will be read then the ohf profile will not be necessary.
+	------------------------------------------------------------------
+	the oppl symbols are not all and they are not even tested, the internal var instead work at 100%.
+	------------------------------------------------------------------
+	if you use prwin the speed will be slow for postflop, at least 10k of iterations are needed for some accuracy.
+	------------------------------------------------------------------
+	for maximum speed disable prwin in player.h and writeHH in ambient.h.
+
+	*/
+
+	return 0;
+
+};
+int Player::set_decision2() {
+	return 0;
+};
+
+//this have PT leak tracker exatly at center of green area, just to not have a random opponent
+//it's not a winner and it doesn't matter. is just to not have a random opponent.
+int Player::set_decision3() {
 	//6max
-	
+
 	switch (*BetRound) {
 	case 1:
-		
 
-	
+
+
 
 		if (hand$AA || hand$KK) { return 3; }
 		switch (Position) {
 			if (BotLastAction == State::None) {
-		case Position::Middle:	
+		case Position::Middle:
 			if (prwin > 0.22 && ToCall <= 5) { return 3; }
 			if (prwin > 0.20 && ToCall <= 1) { return 3; }
 			if (prwin > 0.22 && ToCall <= 5) { return 2; }
@@ -1451,7 +1586,7 @@ int Player::set_decision() {
 		return 0;
 		break;
 
-	//Flop
+		//Flop
 	case 2:
 
 		switch (Position) {
@@ -1505,7 +1640,7 @@ int Player::set_decision() {
 		return 0;
 		break;
 
-	//turn
+		//turn
 	case 3:
 		switch (Position) {
 		case Position::Middle:
@@ -1556,28 +1691,20 @@ int Player::set_decision() {
 
 
 		return 0;
-	//river
+		//river
 	case 4:
 		return 0;
 		break;
 	}
 	return 0;
-};
-int Player::set_decision2() {
 
-	return 0;
-};
-int Player::set_decision3() {
-	
 	return 0;
 };
 int Player::set_decision4() {
-	
-		return 0;
-	
+
+	return 0;	
 
 };
-
 
 bool Player::Call_OK() {
 
@@ -1585,7 +1712,188 @@ bool Player::Call_OK() {
 	return false;
 };
 
-//incomplete
+//set situation based on bot actions
+int Player::set_situation() {
+
+	if (*BetRound == 1) {
+		if (BotLastAction == State::None) return 0;
+		if (BotLastAction == State::Call) return 1;
+		if (BotLastAction == State::Raise) return 2;
+	}	
+	if (*BetRound == 2) {
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::None) return 3;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Call) return 4;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Raise) return 5;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Check) return 6;
+
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::None) return 7;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Call) return 8;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Raise) return 9;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Check) return 10;
+
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::None) return 11;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Call) return 12;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Raise) return 13;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Check) return 14;
+	}
+	if (*BetRound == 3) {
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Call && BotLastTurnAction == State::None) return 15;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Call && BotLastTurnAction == State::Call) return 16;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Call && BotLastTurnAction == State::Raise) return 17;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Call && BotLastTurnAction == State::Check) return 18;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Raise && BotLastTurnAction == State::None) return 19;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Call) return 20;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Raise) return 21;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Check) return 22;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Check && BotLastTurnAction == State::None) return 23;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Check && BotLastTurnAction == State::Call) return 24;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Check && BotLastTurnAction == State::Raise) return 25;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Check && BotLastTurnAction == State::Check) return 26;
+
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Call && BotLastTurnAction == State::None) return 27;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Call && BotLastTurnAction == State::Call) return 28;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Call && BotLastTurnAction == State::Raise) return 29;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Call && BotLastTurnAction == State::Check) return 30;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Raise && BotLastTurnAction == State::None) return 31;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Call) return 32;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Raise) return 33;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Check) return 34;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Check && BotLastTurnAction == State::None) return 35;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Check && BotLastTurnAction == State::Call) return 36;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Check && BotLastTurnAction == State::Raise) return 37;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Check && BotLastTurnAction == State::Check) return 38;
+
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Call && BotLastTurnAction == State::None) return 39;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Call && BotLastTurnAction == State::Call) return 40;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Call && BotLastTurnAction == State::Raise) return 41;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Call && BotLastTurnAction == State::Check) return 42;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Raise && BotLastTurnAction == State::None) return 43;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Call) return 44;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Raise) return 45;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Check) return 46;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Check && BotLastTurnAction == State::None) return 47;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Check && BotLastTurnAction == State::Call) return 48;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Check && BotLastTurnAction == State::Raise) return 49;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Check && BotLastTurnAction == State::Check) return 50;
+
+	}
+	if (*BetRound == 4) {
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Call && BotLastTurnAction == State::Call && BotLastRiverAction == State::None) return 51;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Call && BotLastTurnAction == State::Call && BotLastRiverAction == State::Call) return 52;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Call && BotLastTurnAction == State::Call && BotLastRiverAction == State::Raise) return 53;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Call && BotLastTurnAction == State::Call && BotLastRiverAction == State::Check) return 54;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Call && BotLastTurnAction == State::Raise && BotLastRiverAction == State::None) return 55;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Call && BotLastTurnAction == State::Raise && BotLastRiverAction == State::Call) return 56;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Call && BotLastTurnAction == State::Raise && BotLastRiverAction == State::Raise) return 57;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Call && BotLastTurnAction == State::Raise && BotLastRiverAction == State::Check) return 58;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Call && BotLastTurnAction == State::Check && BotLastRiverAction == State::None) return 59;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Call && BotLastTurnAction == State::Check && BotLastRiverAction == State::Call) return 60;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Call && BotLastTurnAction == State::Check && BotLastRiverAction == State::Raise) return 61;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Call && BotLastTurnAction == State::Check && BotLastRiverAction == State::Check) return 62;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Call && BotLastRiverAction == State::None) return 63;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Call && BotLastRiverAction == State::Call) return 64;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Call && BotLastRiverAction == State::Raise) return 65;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Call && BotLastRiverAction == State::Check) return 66;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Raise && BotLastRiverAction == State::None) return 67;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Raise && BotLastRiverAction == State::Call) return 68;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Raise && BotLastRiverAction == State::Raise) return 69;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Raise && BotLastRiverAction == State::Check) return 70;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Check && BotLastRiverAction == State::None) return 71;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Check && BotLastRiverAction == State::Call) return 72;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Check && BotLastRiverAction == State::Raise) return 73;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Check && BotLastRiverAction == State::Check) return 74;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Check && BotLastTurnAction == State::Call && BotLastRiverAction == State::None) return 75;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Check && BotLastTurnAction == State::Call && BotLastRiverAction == State::Call) return 76;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Check && BotLastTurnAction == State::Call && BotLastRiverAction == State::Raise) return 77;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Check && BotLastTurnAction == State::Call && BotLastRiverAction == State::Check) return 78;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Check && BotLastTurnAction == State::Raise && BotLastRiverAction == State::None) return 79;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Check && BotLastTurnAction == State::Raise && BotLastRiverAction == State::Call) return 80;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Check && BotLastTurnAction == State::Raise && BotLastRiverAction == State::Raise) return 81;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Check && BotLastTurnAction == State::Raise && BotLastRiverAction == State::Check) return 82;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Check && BotLastTurnAction == State::Check && BotLastRiverAction == State::None) return 83;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Check && BotLastTurnAction == State::Check && BotLastRiverAction == State::Call) return 84;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Check && BotLastTurnAction == State::Check && BotLastRiverAction == State::Raise) return 85;
+		if (BotLastPreflopAction == State::Call && BotLastFlopAction == State::Check && BotLastTurnAction == State::Check && BotLastRiverAction == State::Check) return 86;
+
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Call && BotLastTurnAction == State::Call && BotLastRiverAction == State::None) return 87;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Call && BotLastTurnAction == State::Call && BotLastRiverAction == State::Call) return 88;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Call && BotLastTurnAction == State::Call && BotLastRiverAction == State::Raise) return 89;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Call && BotLastTurnAction == State::Call && BotLastRiverAction == State::Check) return 90;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Call && BotLastTurnAction == State::Raise && BotLastRiverAction == State::None) return 91;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Call && BotLastTurnAction == State::Raise && BotLastRiverAction == State::Call) return 92;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Call && BotLastTurnAction == State::Raise && BotLastRiverAction == State::Raise) return 93;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Call && BotLastTurnAction == State::Raise && BotLastRiverAction == State::Check) return 94;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Call && BotLastTurnAction == State::Check && BotLastRiverAction == State::None) return 95;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Call && BotLastTurnAction == State::Check && BotLastRiverAction == State::Call) return 96;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Call && BotLastTurnAction == State::Check && BotLastRiverAction == State::Raise) return 97;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Call && BotLastTurnAction == State::Check && BotLastRiverAction == State::Check) return 98;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Call && BotLastRiverAction == State::None) return 99;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Call && BotLastRiverAction == State::Call) return 100;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Call && BotLastRiverAction == State::Raise) return 101;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Call && BotLastRiverAction == State::Check) return 102;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Raise && BotLastRiverAction == State::None) return 103;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Raise && BotLastRiverAction == State::Call) return 104;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Raise && BotLastRiverAction == State::Raise) return 105;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Raise && BotLastRiverAction == State::Check) return 106;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Check && BotLastRiverAction == State::None) return 107;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Check && BotLastRiverAction == State::Call) return 108;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Check && BotLastRiverAction == State::Raise) return 109;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Check && BotLastRiverAction == State::Check) return 110;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Check && BotLastTurnAction == State::Call && BotLastRiverAction == State::None) return 111;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Check && BotLastTurnAction == State::Call && BotLastRiverAction == State::Call) return 112;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Check && BotLastTurnAction == State::Call && BotLastRiverAction == State::Raise) return 113;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Check && BotLastTurnAction == State::Call && BotLastRiverAction == State::Check) return 114;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Check && BotLastTurnAction == State::Raise && BotLastRiverAction == State::None) return 115;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Check && BotLastTurnAction == State::Raise && BotLastRiverAction == State::Call) return 116;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Check && BotLastTurnAction == State::Raise && BotLastRiverAction == State::Raise) return 117;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Check && BotLastTurnAction == State::Raise && BotLastRiverAction == State::Check) return 118;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Check && BotLastTurnAction == State::Check && BotLastRiverAction == State::None) return 119;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Check && BotLastTurnAction == State::Check && BotLastRiverAction == State::Call) return 120;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Check && BotLastTurnAction == State::Check && BotLastRiverAction == State::Raise) return 121;
+		if (BotLastPreflopAction == State::Raise && BotLastFlopAction == State::Check && BotLastTurnAction == State::Check && BotLastRiverAction == State::Check) return 122;
+
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Call && BotLastTurnAction == State::Call && BotLastRiverAction == State::None) return 123;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Call && BotLastTurnAction == State::Call && BotLastRiverAction == State::Call) return 124;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Call && BotLastTurnAction == State::Call && BotLastRiverAction == State::Raise) return 125;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Call && BotLastTurnAction == State::Call && BotLastRiverAction == State::Check) return 126;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Call && BotLastTurnAction == State::Raise && BotLastRiverAction == State::None) return 127;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Call && BotLastTurnAction == State::Raise && BotLastRiverAction == State::Call) return 128;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Call && BotLastTurnAction == State::Raise && BotLastRiverAction == State::Raise) return 129;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Call && BotLastTurnAction == State::Raise && BotLastRiverAction == State::Check) return 130;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Call && BotLastTurnAction == State::Check && BotLastRiverAction == State::None) return 131;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Call && BotLastTurnAction == State::Check && BotLastRiverAction == State::Call) return 132;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Call && BotLastTurnAction == State::Check && BotLastRiverAction == State::Raise) return 133;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Call && BotLastTurnAction == State::Check && BotLastRiverAction == State::Check) return 134;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Call && BotLastRiverAction == State::None) return 135;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Call && BotLastRiverAction == State::Call) return 136;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Call && BotLastRiverAction == State::Raise) return 137;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Call && BotLastRiverAction == State::Check) return 138;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Raise && BotLastRiverAction == State::None) return 139;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Raise && BotLastRiverAction == State::Call) return 140;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Raise && BotLastRiverAction == State::Raise) return 141;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Raise && BotLastRiverAction == State::Check) return 142;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Check && BotLastRiverAction == State::None) return 143;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Check && BotLastRiverAction == State::Call) return 144;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Check && BotLastRiverAction == State::Raise) return 145;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Raise && BotLastTurnAction == State::Check && BotLastRiverAction == State::Check) return 146;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Check && BotLastTurnAction == State::Call && BotLastRiverAction == State::None) return 147;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Check && BotLastTurnAction == State::Call && BotLastRiverAction == State::Call) return 148;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Check && BotLastTurnAction == State::Call && BotLastRiverAction == State::Raise) return 149;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Check && BotLastTurnAction == State::Call && BotLastRiverAction == State::Check) return 150;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Check && BotLastTurnAction == State::Raise && BotLastRiverAction == State::None) return 151;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Check && BotLastTurnAction == State::Raise && BotLastRiverAction == State::Call) return 152;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Check && BotLastTurnAction == State::Raise && BotLastRiverAction == State::Raise) return 153;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Check && BotLastTurnAction == State::Raise && BotLastRiverAction == State::Check) return 154;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Check && BotLastTurnAction == State::Check && BotLastRiverAction == State::None) return 155;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Check && BotLastTurnAction == State::Check && BotLastRiverAction == State::Call) return 156;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Check && BotLastTurnAction == State::Check && BotLastRiverAction == State::Raise) return 157;
+		if (BotLastPreflopAction == State::Check && BotLastFlopAction == State::Check && BotLastTurnAction == State::Check && BotLastRiverAction == State::Check) return 158;
+
+	}
+	return 0;
+}
+
+//set symbols (incomplete)
 void Player::Set_HavePair(){
 
 	if (nA == 2 ||
@@ -1795,7 +2103,7 @@ bool Player::HaveCard(string _Card) {
 
 	if (mycard[1] == _Card || mycard[2] == _Card) { return true; }
 
-
+	return 0;
 };
 void Player::Set_FlushPossible(){
 
@@ -1816,9 +2124,6 @@ void Player::Set_StraightPossible(){
 
 
 };
-
-
-
 int Player::set_HandRank169() {
 
 	if (hand$AA) { return 1; }
@@ -2152,8 +2457,9 @@ int Player::set_HandRank169() {
 	if (hand$82) { return 165; }
 
 	if (hand$72) { return 166; }
-	
+	return 0;
 };
+
 
 void Player::set_MyCardInNumber(){
 	int temp;
@@ -2544,3 +2850,28 @@ void Player::Set_Symbols() {
 
 
 };
+
+bool Player::PotRange(int _min, int _max) {
+
+	if (Pot >= _min && Pot <= _max) return true;
+	return false;
+};
+bool Player::StackRange(int _min, int _max){
+
+	//if (mystack >= _min && mystack <= _max) return true;
+	return false;
+
+};
+bool Player::PrwinRange(float _min, float _max){
+	if (prwin >= _min && prwin <= _max) return true;
+	return false;
+
+};
+int Player::Set_PreflopSituationNumber() {
+
+	
+	return 0;
+};
+
+
+

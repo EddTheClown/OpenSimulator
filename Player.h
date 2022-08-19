@@ -237,16 +237,16 @@ public:
 
 	//Manual modify only these variables
 
-	bool bDebug = false;
+	bool bDebug = true;
+	bool bprwin = 1;
+	float prwin_iterations = 10000;
 
-	bool bprwin = true;
-	float prwin_iterations = 1000;
+	bool ManualPlay = false;	
+	bool opponentprwin = false;
+	bool writehand = false;
 
-	bool ManualPlay = false;
 
-	//--------------------------
 
-	
 	//player var
 	int currentbet = 0;
 	int OpponentsAtTable = 0;
@@ -272,8 +272,9 @@ public:
 	int myseat = 0;
 	int myprize = 0;
 	int decision = 0;
-	
+	int Opponents = 0;
 	int mycardInNumber[7] = { -2 };
+	int Pot = 0;
 	double prwin = 0;
 	float prlos = 0;
 
@@ -281,6 +282,8 @@ public:
 	string myname = "";
 	string mycards = "";
 
+	int LastRaiserPosition = 0;
+	int FirstRaiserPosition = 0;
 
 
 	bool PairInHand = false;
@@ -306,12 +309,23 @@ public:
 	bool inCutOff = false;
 	bool inMiddlePosition = false;
 	bool inEarlyPosition = false;
-	bool writehand = false;
+
 	bool winner = false;
 
 
+	string card1 = "";
+	string card2 = "";
+	string card3 = "";
+	string card4 = "";
+	string card5 = "";
+	string card6 = "";
+	string card7 = "";
 
 
+	int Situation = 0;
+	double totvolte[10] = { 0 };
+	double volte[10][1000] = {0};
+	double needprwin[10][1000] = { 0 };
 
 	//pointers
 
@@ -360,7 +374,6 @@ public:
 	void handreset();
 
 
-	void set_TotalInvested();
 	void set_MaxOpponentStackSize();
 	void set_AmountToCall();
 	void set_OpponentsAtTable();
@@ -370,13 +383,7 @@ public:
 	int  set_HandRank169();
 	void set_position();
 	void set_mycard();
-	void set_Pocket_Card(string card1, string card2);
-	void set_Flop_Card(string card1, string card2, string card3);
-	void set_Turn_Card(string card1);
-	void set_River_Card(string card1);
-	void set_All_Card(string card1, string card2, string card3, string card4, string card5, string card6, string card7);
 	void set_effective_stack();
-
 
 
 
@@ -403,12 +410,13 @@ public:
 	int  set_decision2();
 	int	 set_decision3();
 	int	 set_decision4();
+	int set_situation();
 
-	void calc_prwin();
+	double calc_prwin();
 	void pDebug();
 
 
-	bool Call_OK();
+
 	bool HaveCard(string _Card);
 
 	void Set_Symbols();
@@ -428,6 +436,19 @@ public:
 
 	void Set_PreflopNumber();
 	void set_MyCardInNumber();
+	bool Call_OK();
+
+	bool PotRange(int _min, int _max);
+	bool StackRange(int _min, int _max);
+	bool PrwinRange(float _min, float _max);
+
+
+	string State_to_String(State action);
+	
+
+
+	int Set_PreflopSituationNumber();
+
 
 
 };

@@ -16,8 +16,8 @@ private:
 			  "Ah", "Kh", "Qh", "Jh","Th", "9h", "8h", "7h", "6h", "5h", "4h", "3h", "2h" };
 
 	
-	char Rank[13] = { 'A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2' };
-	char Suits[4] = { 'd','h', 'c', 's' };
+	string Rank[13] = { "A", "K", "Q", "J", "T", "9", "8", "7", "6", "5", "4", "3", "2" };
+	string Suits[4] = { "d","h", "c", "s" };
 	double prwin = 0;
 	float prtie = 0;
 	float prlos = 0;
@@ -78,6 +78,8 @@ public:
 	double Flop_precalc_prwin(int FlopNumber, int nPlayers);
 	double Turn_precalc_prwin(int TurnNumber, int nPlayers);
 	double River_precalc_prwin(int RiverNumber, int nPlayers);
+
+
 
 
 };

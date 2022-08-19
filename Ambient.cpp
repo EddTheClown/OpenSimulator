@@ -1,67 +1,94 @@
 #include "Main.h"
-
 #include "prwin_calcolator.h"
 
 using namespace std;
 
-
+//entry point of simulation
 void Ambient::start_simulation(int _nPlayers, int _NumberOfSimulation) {
-	_NumberOfSimulation == 0 ? NumberOfSimulation = 10000000 : NumberOfSimulation = _NumberOfSimulation;
-
+	//initialize basic var of simulation
+	if (_NumberOfSimulation != 0) NumberOfSimulation = _NumberOfSimulation;
 	nPlayers = _nPlayers;
 
+	//check if args is correct
 	if (nPlayers > SeatsMaxNumber) { nPlayers = SeatsMaxNumber; }
 	if (nPlayers < 2) { nPlayers = 2; }
 
-
-
+	//initialize blind position
 	set_startitng_position();
+
+	//load the last saved hand number, for not duplicate pt hands
 	load_last_handumber();
+
+	//set pointers to let player and ambient know their status at any time
 	set_pointers();
 
-
+	//set whether tournament or cash from ambient.h var(incomplete)
 	set_game_type();
+
+	//initialize players var
 	set_initial_player_var();
 
 
-
+	//play hand for all number of simulations
 	for (int i = 0; i < NumberOfSimulation; i++) {
-		//if(Handnumber%1000 == 0) cout << Handnumber << endl;
-		cout << Handnumber << endl;
-		rebuy_options();
+		if (showhandnumber && Handnumber % 1000 == 0) {
+			cout << Handnumber<<endl;
+		}
 
+		//choose if you want to rebuy (incomplete)
+		rebuy_options();	
+
+		//start effective simulation
 		start_hand();
 
+		//break simulation if some conditions
 		if (nPlayers == 1) { Tournament_Finish(); break; };
-		
-
-
 
 	};
-
+	
+	
+	//save the last hand numer if is true in ambient.h
 	save_last_handumber();
-
+	
 
 };
-void Ambient::start_hand() {
 
+//play hands for each number of simulations
+void Ambient::start_hand() {
+	
+	//reset all vars
 	HandReset();
 	players_handreset();
 
+	//use here condition like this for simulate only specific hands
+		//if (!p[0].inBigBlind) return;
 
+
+	//if remain only one player the game is end
 	if (nPlayers == 1) { return; }
-	handhistory_new_hand();
 
+	//start new hand in hand history
+	handhistory_new_hand();
+	
+	//put ante in the pot if is tournament
 	if (bTournament) { Ante(); }
+
+	//play preflop
 	Preflop();
+
+	//play hand
 	Handplay();
 	goto_betround();
 
 }
 
+//create new deck
 void Ambient::MixDeck(string _pCard1, string _pCard2, string _flop1, string _flop2, string _flop3, string _turn, string _river)
 {	
-
+	//create new random deck
+	//player 0 always have card 0 and 1
+	//postflop card is aways card 2 3 4 5 6 
+	//all other cards to other players
 	int Numero = 0;
 
 	ShuffledDeck[0] = _pCard1;
@@ -72,13 +99,14 @@ void Ambient::MixDeck(string _pCard1, string _pCard2, string _flop1, string _flo
 	ShuffledDeck[5] = _turn;
 	ShuffledDeck[6] = _river;
 
-
+	//ShuffledDeck[0] = "Kc";
+	//ShuffledDeck[1] = "Kd";
 
 	int indice = 2;
-	if (_pCard1 == "") { indice = 0; }
-	else if (_flop1 != "") { indice = 5; }
-	else if (_turn != "") { indice = 6; }
-	else if (_river != "") { indice = 7; };
+	if (ShuffledDeck[0] == "") { indice = 0; }
+	if (ShuffledDeck[2] != "") { indice = 5; }
+	if (ShuffledDeck[5] != "") { indice = 6; }
+	if (ShuffledDeck[6] != "") { indice = 7; };
 
 
 
@@ -96,8 +124,9 @@ void Ambient::MixDeck(string _pCard1, string _pCard2, string _flop1, string _flo
 
 };
 
-
+//reset all ambient var
 void Ambient::HandReset() {
+	//reset all ambient var
 	if (bTournament == true) { TournamentSpeed++; };
 
 	Handnumber++;
@@ -138,8 +167,10 @@ void Ambient::HandReset() {
 	set_BlindsPosition();
 
 };
-void Ambient::players_handreset() {
 
+//reset all player var
+void Ambient::players_handreset() {
+	//reset all player var
 	for (int i = 0; i < nPlayers; i++) {
 		if (p[i].mystate == State::Out || p[i].mystack == 0) { nPlayers--; continue; }
 		p[i].handreset();
@@ -148,8 +179,12 @@ void Ambient::players_handreset() {
 	};
 
 }
+
+//check if some player have to act to make new orbit in hand
 bool Ambient::NewOrbit() {
+	//check if some player have to act to make new orbit in hand
 	set_PlayersInHand();
+
 
 	for (int i = 0; i < nPlayers; i++) {
 		if (*PlayersBet[i] != BetSize && PlayersInHand <= 1 && *PlayersState[i] == State::Check) { return true; }
@@ -162,11 +197,15 @@ bool Ambient::NewOrbit() {
 	};
 
 
+	RoundRaises = 0;
+	RoundCalls = 0;
 	BetRound++;
 	return false;
 
 };
+//check if some player shoul be ignored (es allin)
 bool Ambient::IgnorePlayer(int _index) {
+	//check conditions if have to ignore player
 	if (*PlayersState[_index] == State::null) { return false; };
 
 
@@ -201,8 +240,9 @@ bool Ambient::IgnorePlayer(int _index) {
 
 };
 
+//initialize var of position
 void Ambient::set_startitng_position() {
-
+	//initialize var of position
 	if (nPlayers > 6) {
 
 		SBPosition = 0;
@@ -231,8 +271,10 @@ void Ambient::set_startitng_position() {
 
 
 };
-void Ambient::set_BlindsPosition() {
 
+//set blind position, the first of act is 0
+void Ambient::set_BlindsPosition() {
+	//set blind position, the first of act is 0
 	if (SBPosition == nPlayers) { SBPosition = 0; }
 	if (BBPosition == nPlayers) { BBPosition = 0; }
 	if (EarlyPosition1 == nPlayers) { EarlyPosition1 = 0; }
@@ -249,23 +291,16 @@ void Ambient::set_BlindsPosition() {
 	
 
 };
-void Ambient::set_PlayersInHand() {
-	Calls = 0;
-	Folds = 0;
-	Raises = 0;
-	Checks = 0;
-	Allins = 0;
-	Bets = 0;
-	StillToAct = -1;
-	PlayersInHand = 0;
-	MaxInvested = 0;
-	ActivePlayer = 0;
 
+//check table state: raises,calls ecc (incomplete)
+void Ambient::set_PlayersInHand() {
+	reset_action_counts();
+	//check table state: raises, calls ecc(incomplete)
 	for (int i = 0; i < nPlayers; i++) {
 
 		if (*PlayersState[i] == State::None) { StillToAct++; PlayersInHand++; ActivePlayer++; };
 		if (*PlayersState[i] == State::Blinds) { StillToAct++; PlayersInHand++; ActivePlayer++;	};
-		if (*PlayersState[i] == State::null) { ActivePlayer++; PlayersInHand++; };
+		if (*PlayersState[i] == State::null) { StillToAct++; ActivePlayer++; PlayersInHand++; };
 		if (*PlayersState[i] == State::Fold) { Folds++; };
 		if (*PlayersState[i] == State::Check) { ActivePlayer++; Checks++; PlayersInHand++; };
 		if (*PlayersState[i] == State::Call) { ActivePlayer++; Calls++; PlayersInHand++; };
@@ -278,8 +313,9 @@ void Ambient::set_PlayersInHand() {
 	}
 
 
-
 }
+
+//only for tournament set the blind level
 void Ambient::set_Blind_Level() {
 	//double blinds
 	if (TournamentSpeed == IncreaseBlindEveryHand) {
@@ -291,9 +327,13 @@ void Ambient::set_Blind_Level() {
 
 
 }
+
+//calculate the pot on table (sum of all bets and antes)
 void Ambient::set_Pot() {
+	
 	set_PlayersInHand();
 
+	//reset pot and recalc
 	PotSize = 0;
 	for (int i = 0; i < nPlayers; i++) {
 
@@ -307,9 +347,12 @@ void Ambient::set_Pot() {
 
 
 };
+
+//calc the size of the betsize
 void Ambient::set_BetSize() {
 	if (PlayersInHand == 2 && *PlayersBet[SBPosition] > SBsize && *PlayersBet[SBPosition] < BBsize) { BetSize = *PlayersBet[SBPosition]; return; }
 
+	//reset betsize and recalc the size of the betsize
 	BetSize = 0;
 
 	for (int i = 0; i < nPlayers; i++) {
@@ -319,6 +362,8 @@ void Ambient::set_BetSize() {
 
 
 };
+
+//set if is tournament o cash for ante or blind manage (incomplete)
 void Ambient::set_game_type() {
 	if (bTournament == true) {
 		ANTEsize = 2;
@@ -336,8 +381,11 @@ void Ambient::set_game_type() {
 		PlayersStartingStack = 200;
 	}
 }
+
+//set pointer for comunicate players and ambient at any time
 void Ambient::set_pointers() {
 
+	//set player to ambient pointers
 	for (int i = 0; i - nPlayers; i++) {
 		
 		p[i].BetRound = &BetRound;
@@ -362,9 +410,9 @@ void Ambient::set_pointers() {
 
 
 
-		p[i].Calls = &Calls;
+		p[i].Calls = &RoundCalls;
 		p[i].Folds = &Folds;
-		p[i].Raises = &Raises;
+		p[i].Raises = &RoundRaises;
 		p[i].Bets = &Bets;
 		p[i].Allins = &Allins;
 		p[i].Checks = &Checks;
@@ -373,6 +421,7 @@ void Ambient::set_pointers() {
 
 	}
 
+	//set ambient from player pointers
 	for (int i = 0; i - nPlayers; i++) {
 		PlayersStack[i] = &p[i].mystack;
 		PlayersPosition[i] = &p[i].myposition;
@@ -393,22 +442,23 @@ void Ambient::set_pointers() {
 
 	}
 
-	int indicemazzo = 0;
+	//set player cards pointers from ambient deck
+	int index = 0;
 	for (int i = 0; i - nPlayers; i++) {
-		p[i].MyCards[0] = &ShuffledDeck[indicemazzo];
-		indicemazzo++;
-		p[i].MyCards[1] = &ShuffledDeck[indicemazzo];
-		indicemazzo++;
+		p[i].MyCards[0] = &ShuffledDeck[index];
+		index++;
+		p[i].MyCards[1] = &ShuffledDeck[index];
+		index++;
 	}
 	//player postflop card
 	for (int i = 0; i - nPlayers; i++) {
-		p[i].MyCards[2] = &ShuffledDeck[indicemazzo];
-		p[i].MyCards[3] = &ShuffledDeck[(indicemazzo + 1)];
-		p[i].MyCards[4] = &ShuffledDeck[(indicemazzo + 2)];
-		p[i].MyCards[5] = &ShuffledDeck[(indicemazzo + 3)];
-		p[i].MyCards[6] = &ShuffledDeck[(indicemazzo + 4)];
+		p[i].MyCards[2] = &ShuffledDeck[index];
+		p[i].MyCards[3] = &ShuffledDeck[(index + 1)];
+		p[i].MyCards[4] = &ShuffledDeck[(index + 2)];
+		p[i].MyCards[5] = &ShuffledDeck[(index + 3)];
+		p[i].MyCards[6] = &ShuffledDeck[(index + 4)];
 	}
-	indicemazzo = 0;
+	index = 0;
 
 	for (int i = 0; i - nPlayers; i++) {
 		for (int j = 0; j - 52; j++) {
@@ -416,9 +466,11 @@ void Ambient::set_pointers() {
 		}
 	}
 };
+
+//initialize players var
 void Ambient::set_initial_player_var() {
 
-
+	//set the initial players var
 	for (int i = 0; i < nPlayers; i++) {
 		p[i].myseat = (i + 1);
 		p[i].myposition = (i - 1);
@@ -431,12 +483,15 @@ void Ambient::set_initial_player_var() {
 };
 
 
-
+//add line to ram for hand hystory (it will be written on txt at the end of the hand)
 void Ambient::HandHistory(string _text) {
+	//add line to ram for hand hystory (it will be written on txt at the end of the hand)
 	if (bHandHistory) {
 		HHline += _text + "\n";
 	}
 }
+
+//add on HH the player action
 void Ambient::handhistory_player_action(int i) {
 
 	
@@ -540,6 +595,8 @@ void Ambient::handhistory_player_action(int i) {
 	}
 
 };
+
+//add on HH the begin of new hand
 void Ambient::handhistory_new_hand() {
 	int Table = 0;
 
@@ -580,16 +637,22 @@ void Ambient::handhistory_new_hand() {
 		}
 	}
 };
+//write HH on txt and clean ram
 void Ambient::handhistory_finish() {
 	HandHistory("\n");
-	if (!SingleSituation) {			
+	//for havoid multi pot rare problems
+	if (NumberOfWinners != 1)return;
+
+	//if single situation is active in ambient.h 
+	//only hands specified by player 0 will be written
+	if (!SingleSituation) {
 		ofstream hand;
 		hand.open(HH_File, ios::app);
 		hand << HHline;
 		hand.close();		
 		return;}
 	else {
-
+		
 		if (p[0].writehand) {
 			p[0].writehand = false;
 
@@ -597,7 +660,7 @@ void Ambient::handhistory_finish() {
 			hand.open(HH_File, ios::app);
 			hand << HHline;
 			hand.close();
-		
+			
 		}
 
 
@@ -607,14 +670,7 @@ void Ambient::handhistory_finish() {
 		
 };
 
-
-void Ambient::create_players(int _nPlayers) {
-
-	//Player* p = new Player[_nPlayers];
-
-
-}
-
+//load last hand number if active in ambient.h for not duplicate pt hand
 void Ambient::load_last_handumber() {
 	string nHand;
 	ofstream write;
@@ -650,6 +706,7 @@ void Ambient::load_last_handumber() {
 	}
 
 };
+//save last hand number if active in ambient.h for not duplicate pt hand
 void Ambient::save_last_handumber() {
 	if (!SaveLastHandNumber) {
 		Handnumber = 0;
@@ -660,8 +717,49 @@ void Ambient::save_last_handumber() {
 	handN.close();
 }
 
+//reset action on table var (raises , calls ecc)
+void Ambient::reset_action_counts() {
+	Calls = 0;
+	Folds = 0;
+	Raises = 0;
+	Checks = 0;
+	Allins = 0;
+	Bets = 0;
+	StillToAct = -1;
+	PlayersInHand = 0;
+	MaxInvested = 0;
+	ActivePlayer = 0;
+
+}
+
+//choose bet round to play
+void Ambient::goto_betround() {
+	switch (BetRound)
+	{
+	case 1:
+		if (PlayersInHand <= 1 && !isSimulation) { BetRound = 2; goto_betround(); return; };
+		Preflop();
+		break;
+	case 2:
+		Flop(); return;
+		break;
+	case 3:
+		Turn(); return;
+		break;
+	case 4:
+		River(); return;
+		break;
+	case 5:
+		Showdown();  return;
+		break;
+	default:
+		break;
+	}
 
 
+};
+
+//put ante in the pot 
 void Ambient::Ante() {
 	BetRound = 0;
 	for (int i = 0; i < nPlayers; i++) {
@@ -671,14 +769,19 @@ void Ambient::Ante() {
 	set_Pot();
 
 };
+
+//play preflop 
 void Ambient::Preflop() {
 	if (!isSimulation)set_Preflop_PlayerVar();
 	Handplay();
+
 	goto_betround();
 };
+//play flop 
 void Ambient::Flop() {
 	BetRound = 2;
 	HandHistory("** Dealing flop ** [ " + *p[0].MyCards[2] + ", " + *p[0].MyCards[3] + ", " + *p[0].MyCards[4] + " ]");
+	
 	if (PlayersInHand <= 1 && !isSimulation) { set_players_card(), Turn(); return; };
 	if (!isSimulation)reset_players_state();
 	Handplay();
@@ -686,6 +789,7 @@ void Ambient::Flop() {
 
 
 };
+//play turn
 void Ambient::Turn() {
 	BetRound = 3;
 
@@ -696,6 +800,7 @@ void Ambient::Turn() {
 	goto_betround();
 
 };
+//play river
 void Ambient::River() {
 	BetRound = 4;
 	HandHistory("** Dealing river ** [ " + *p[0].MyCards[6] + " ]");
@@ -707,30 +812,47 @@ void Ambient::River() {
 	}
 
 };
+
+//the end of hand
 void Ambient::Showdown() {
 	HandHistory("** Summary **");
 	BetRound = 5;
 
+	//remove from pot in case of call-allin from someone
 	remove_from_pot();
+
+	
 	set_Winners();
 	handhistory_finish();
 
 };
+
+//play the hand
 void Ambient::Handplay() {
 	int i = 0;
 	
+	//for simulation into simulation only
 	if (isSimulation) {i = index; isSimulation = false;}
 	else { i = SBPosition; }
 
+	//make players decision as long as necessary
 	for (i ; i <= nPlayers; i++) {
+		//ignore player that not have to act
 		if (i == nPlayers) { i = 0; }
-		if (i == SBPosition && !NewOrbit()) { break; }
+ 		if (i == SBPosition && !NewOrbit()) { break; }
 		if (IgnorePlayer(i)) { continue; }
 
+		//let player decide action
 		p[i].MyTurn(p);
 
+		//count tot raises for orbit
+		if (p[i].BotLastAction == State::Raise) RoundRaises++;
+		if (p[i].BotLastAction == State::Call) RoundCalls++;
 
+		//write in hand hystory player action
 		handhistory_player_action(i);
+
+		//calculate new pot
 		set_Pot();
 
 
@@ -740,6 +862,7 @@ void Ambient::Handplay() {
 
 };
 
+//remove from pot in case di call allin or similar
 void Ambient::remove_from_pot() {
 
 
@@ -773,6 +896,8 @@ void Ambient::remove_from_pot() {
 	
 
 };
+
+//calc the prize for winners
 void Ambient::calc_prize() {
 	
 
@@ -863,6 +988,7 @@ void Ambient::calc_prize() {
 		*/
 };
 
+//set the winners
 void Ambient::set_Winners() {
 
 	MaxStrenght = 0;
@@ -880,6 +1006,8 @@ void Ambient::set_Winners() {
 	pay_winners();
 
 }
+
+//add the prize at the stack of winners
 void Ambient::pay_winners() {
 
 	//hand hystory
@@ -890,8 +1018,8 @@ void Ambient::pay_winners() {
 	
 	//pay winners
 	for (int i = 0; i < nPlayers; i++) {
-				if (p[i].HandStrength == MaxStrenght && p[i].mystate != State::Fold) {
-					p[i].mystack += p[i].myprize;
+				if (p[i].HandStrength == MaxStrenght && p[i].mystate != State::Fold) {					
+					p[i].TakePrize(p[i].myprize);
 					p[i].winner = true;
 					if (bTournament == true) { HandHistory(p[i].myname + " collected [ " + to_string(p[i].myprize) + " ]"); }
 					else { HandHistory(p[i].myname + " collected [ €" + to_string(p[i].myprize) + " ]"); };
@@ -907,11 +1035,13 @@ void Ambient::pay_winners() {
 	}
 }
 
+//at the end of tournament (incomplete=
 void Ambient::Tournament_Finish() {
 
 
 }
 
+//check of many player are in showdown
 void Ambient::calc_player_at_showdown() {
 
 	for (int i = 0; i < nPlayers; i++) {
@@ -923,6 +1053,7 @@ void Ambient::calc_player_at_showdown() {
 
 
 };
+//check of many playes have win
 void Ambient::calc_number_of_winners() {
 	//calc number of winners
 	for (int i = 0; i < nPlayers; i++) {
@@ -932,6 +1063,7 @@ void Ambient::calc_number_of_winners() {
 
 
 }
+//calc the strenth of all player in the showdown
 void Ambient::calc_max_handstrength() {
 	MaxStrenght = -100000;
 	MaxStrenght2 = -100000;
@@ -955,7 +1087,7 @@ void Ambient::calc_max_handstrength() {
 };
 
 
-
+//reset the state players at the end of orbit
 void Ambient::reset_players_state() {
 
 	for (int i = 0; i < nPlayers; i++) {
@@ -966,32 +1098,8 @@ void Ambient::reset_players_state() {
 	set_Pot();
 
 };
-void Ambient::goto_betround() {
 
-	switch (BetRound)
-	{
-	case 1:
-		if (PlayersInHand <= 1 && !isSimulation ) { BetRound = 2; goto_betround(); return;	};
-		Preflop();
-		break;
-	case 2:
-		Flop(); return;
-		break;
-	case 3:
-		Turn(); return;
-		break;
-	case 4:
-		River(); return;
-		break;
-	case 5:
-		Showdown();  return;
-		break;
-	default:
-		break;
-	}
-
-
-};
+//update the card known of player based on betround
 void Ambient::set_players_card() {
 	for (int i = 0; i < nPlayers; i++) {
 		if (p[i].mystate == State::Fold) { continue; }
@@ -1001,6 +1109,8 @@ void Ambient::set_players_card() {
 
 
 };
+
+//get the player handstrength
 void Ambient::players_count_hand_strength() {
 
 	for (int i = 0; i < nPlayers; i++) {
@@ -1011,6 +1121,8 @@ void Ambient::players_count_hand_strength() {
 	}
 
 };
+
+//set the initial var of player at preflop
 void Ambient::set_Preflop_PlayerVar() {
 
 
@@ -1025,6 +1137,7 @@ void Ambient::set_Preflop_PlayerVar() {
 
 };
 
+//manage rebuy options (at the moment is automatic never go out)
 void Ambient::rebuy_options() {
 	for (int i = 0; i < nPlayers; i++) {
 		if (p[i].mystate == State::Out) { p[i].mystack = 200; p[i].mystate = State::Fold; };
@@ -1033,6 +1146,8 @@ void Ambient::rebuy_options() {
 
 
 };
+
+//set the hand history file to write manually
 void Ambient::set_HandHistory(bool _bool,string _file) {
 
 	HH_File = _file;

@@ -16,8 +16,8 @@ class Ambient {
 
 public:
 	const int SeatsMaxNumber = 9;
-	int nPlayers = 9;
 
+	int nPlayers = 9;
 
 	Player* p = new Player[nPlayers];
 	string NewDeck[52] = { "Ad", "Kd", "Qd", "Jd","Td", "9d", "8d", "7d", "6d", "5d", "4d", "3d", "2d" ,
@@ -30,11 +30,15 @@ public:
 	Player prwin[10];
 
 	//Manual modify only these variables
-	int NumberOfSimulation = 100000;	
-	bool bHandHistory = true;
-	bool SingleSituation = false;
+
+	int NumberOfSimulation = 10000;	
+	bool bHandHistory = 1;
+	bool SingleSituation = 0;
+
+	bool showhandnumber = 1;
 	bool bTournament = false;
 	bool SaveLastHandNumber = false;
+	bool PT_autoimport = 1;
 
 	//--------------------------------------
 	int IncreaseBlindEveryHand = 10;
@@ -52,6 +56,7 @@ public:
 	int COPosition = 0;
 	int ButtonPosition = 0;	
 	
+
 
 	int BBsize = 10;
 	int SBsize = 5;
@@ -74,7 +79,8 @@ public:
 	int maxbet = 0;
 	int maxbet2 = 0;
 
-
+	int RoundRaises = 0;
+	int RoundCalls = 0;
 	int nMaxBet = 0;
 
 	int index = 0;
@@ -169,7 +175,6 @@ public:
 	void handhistory_finish();
 	void goto_betround();
 
-	void create_players(int _nPlayers = 9);
 	void reset_players_state();
 	void load_last_handumber();
 	void save_last_handumber();
@@ -184,5 +189,5 @@ public:
 
 	void set_HandHistory(bool _bool, string _file = "HandHistory.txt");
 	void set_startitng_position();
-
+	void reset_action_counts();
 };

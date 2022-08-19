@@ -1,4 +1,5 @@
 #include "CHandStrength.h"
+//hand evaluator that return the strength of hand
 int CHandStrength::calc_HandStrength(string card1, string card2, string card3, string card4, string card5, string card6, string card7) {
 
 	Reset_CountCard();
@@ -14968,6 +14969,7 @@ int CHandStrength::calc_HandStrength(string card1, string card2, string card3, s
 
 
 }
+//count card for evaluation
 void CHandStrength::CountCard() {
 	string line ="";
 
@@ -15048,6 +15050,7 @@ void CHandStrength::CountCard() {
 
 
 };
+//reset all cards var
 void CHandStrength::Reset_CountCard() {
 
 

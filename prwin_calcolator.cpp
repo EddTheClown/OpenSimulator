@@ -1,25 +1,18 @@
 #include "prwin_calcolator.h"
 
 
+//calc prwin with montecarlo simulation
 double prwin_calcolator::calc_prwin(string _pCard1, string _pCard2, string _flop1, string _flop2, string _flop3, string _turn, string _river, int _PlayersInHand, int _nIteration) {
 	nIterations = _nIteration;
 	nPlayers = _PlayersInHand;
 
-	pCard1 = _pCard1;
-	pCard2 = _pCard2;
-	flop1 = _flop1;
-	flop2 = _flop2;
-	flop3 = _flop3;
-	turn = _turn;
-	river = _river;
-
 	prwin = 0;
-
+	nWin = 0;
 
 
 	for (int i = 0; i < nIterations; i++) {
 
-		MixDeck(pCard1, pCard2, flop1, flop2, flop3, turn, river);
+		MixDeck(_pCard1, _pCard2, _flop1, _flop2, _flop3, _turn, _river);
 		set_players_card();
 		set_player_strength();
 		if (winner() == true) { nWin++; };
@@ -34,6 +27,7 @@ double prwin_calcolator::calc_prwin(string _pCard1, string _pCard2, string _flop
 
 }
 
+//create new deck keeping only the known cards
 void prwin_calcolator::MixDeck(string _pCard1, string _pCard2, string _flop1, string _flop2, string _flop3, string _turn, string _river)
 {
 
@@ -78,6 +72,8 @@ void prwin_calcolator::MixDeck(string _pCard1, string _pCard2, string _flop1, st
 
 
 };
+
+//calc the stength of players
 void prwin_calcolator::set_player_strength() {
 
 	CHandStrength* calc = new CHandStrength;
@@ -149,6 +145,8 @@ void prwin_calcolator::set_player_strength() {
 
 
 }
+
+//set the players card (0 and 1 is always hero cards , 23456 always post flop) 
 void prwin_calcolator::set_players_card() {
 
 	switch (nPlayers) {
@@ -262,6 +260,8 @@ void prwin_calcolator::set_players_card() {
 	}
 
 }
+
+//compare the hand strength of the players to decide if won
 bool prwin_calcolator::winner() {
 
 	int Strength = -1000000;
@@ -269,19 +269,7 @@ bool prwin_calcolator::winner() {
 		if (pStrength[i] >= Strength) { Strength = pStrength[i]; };
 
 	}
-	/*
-	cout << "p0: " << p0card[0] << p0card[1] << flop1 << flop2 << flop3 << turn << river << endl;
-	cout << "p1: " << p1card[0] << p1card[1] << flop1 << flop2 << flop3 << turn << river << endl;
-	cout << "p2: " << p2card[0] << p2card[1] << flop1 << flop2 << flop3 << turn << river << endl;
-	cout << "p3: " << p3card[0] << p3card[1] << flop1 << flop2 << flop3 << turn << river << endl;
-	cout << "p4: " << p4card[0] << p4card[1] << flop1 << flop2 << flop3 << turn << river << endl;
-	cout << "p5: " << p5card[0] << p5card[1] << flop1 << flop2 << flop3 << turn << river << endl<<endl;
-	*/
-
-
-
-
-
+	
 	int nWinners = 0;
 	for (int i = 0; i < nPlayers; i++) {
 		if (pStrength[i] == Strength) { nWinners++; };
@@ -292,6 +280,8 @@ bool prwin_calcolator::winner() {
 	//if (pStrength[0] != Strength) { prlos++; }
 	return false;
 };
+
+//reset all player cards
 void prwin_calcolator::reset_player_cards() {
 
 
@@ -312,16 +302,12 @@ void prwin_calcolator::reset_player_cards() {
 	p8card[0] = "";
 	p8card[1] = "";
 
-	//flop1 = "";
-	//flop2 = "";
-	//flop3 = "";
-	//turn = "";
-	//river = "";
+	
 
 
 };
 
-
+//return pre calc prwin preflop without montecarlo simulation (very fast!)
 double prwin_calcolator::Preflop_precalc_prwin(int PreflopNumber,int nPlayers) {
 	switch (PreflopNumber) {
 	case 1:
@@ -487,6 +473,7 @@ double prwin_calcolator::Preflop_precalc_prwin(int PreflopNumber,int nPlayers) {
 			break;
 		}//switch nPlayers close
 	case 7:
+
 		switch (nPlayers) {
 		case 2:  //AJs 2 Players 
 			return 0.64434;
@@ -4892,6 +4879,8 @@ double prwin_calcolator::Preflop_precalc_prwin(int PreflopNumber,int nPlayers) {
 
 	return 0;
 }
+
+//incomplete
 double prwin_calcolator::Flop_precalc_prwin(int FlopNumber, int nPlayers) {
 	
 
@@ -4907,3 +4896,5 @@ double prwin_calcolator::River_precalc_prwin(int RiverNumber, int nPlayers) {
 
 	return 0;
 }
+
+
