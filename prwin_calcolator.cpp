@@ -51,9 +51,9 @@ void prwin_calcolator::MixDeck(string _pCard1, string _pCard2, string _flop1, st
 
 	int indice = 2;
 	if (_pCard1 == "") { indice = 0; }
-	else if (_flop1 != "") { indice = 5; }
-	else if (_turn != "") { indice = 6; }
-	else if (_river != "") { indice = 7; };
+	if (_flop1 != "") { indice = 5; }
+	if (_turn != "") { indice = 6; }
+	if (_river != "") { indice = 7; };
 
 
 
