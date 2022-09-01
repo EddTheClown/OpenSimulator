@@ -4,9 +4,9 @@ the open simulator is a c ++ class that can be used in any project by simply cre
 
 the actual entry point is start_simulation (nplayer), but any personal function can be created as an entry point, so you can use it as a dll for a bot or any project.
 
-what it does is simulate the game of texas hold em no limit poker very quickly, so after writing the logic that decides the simulation, it writes HH to import into poker track or similar to analyze what happened, (works fine with pt 4.15.28)
+what it does is simulate the game of texas hold em no limit poker very quickly, so after writing the logic and run the simulation, it writes HH to import into poker track or similar to analyze what happened, (works fine with pt 4.15.28)
 
-so the current state of the is that it perfectly simulates and writes to HH every hand very quickly. (negligible error rate of 0.02% on multiple pot)
+so the current state of the is that it perfectly simulates and writes to HH every hand very quickly. (negligible error rate of 0.02% in case of multiple pot)
 
 the real potential comes from manipulating simulations programmatically, so you can simulate anything with a little bit of code.
 
