@@ -154,11 +154,90 @@ void Ambient::HandReset() {
 	COPosition++;
 	ButtonPosition++;
 
+
+	switch (nPlayers) {
+	case 2:
+		SBPosition++;
+		BBPosition++;
+
+		break;
+	case 3:
+		SBPosition++;
+		BBPosition++;
+		ButtonPosition++;
+
+		break;
+	case 4:
+		SBPosition++;
+		BBPosition++;
+		COPosition++;
+		ButtonPosition++;
+		break;
+	case 5:
+		SBPosition++;
+		BBPosition++;
+		MiddlePosition3++;
+		COPosition++;
+		ButtonPosition++;
+		break;
+	case 6:
+		SBPosition++;
+		BBPosition++;
+		MiddlePosition2++;
+		MiddlePosition3++;
+		COPosition++;
+		ButtonPosition++;
+
+
+		break;
+	case 7:
+		SBPosition++;
+		BBPosition++;
+		MiddlePosition1++;
+		MiddlePosition2++;
+		MiddlePosition3++;
+		COPosition++;
+		ButtonPosition++;
+		break;
+	case 8:
+		SBPosition++;
+		BBPosition++;
+		EarlyPosition2++;
+		MiddlePosition1++;
+		MiddlePosition2++;
+		MiddlePosition3++;
+		COPosition++;
+		ButtonPosition++;
+		break;
+	case 9:
+		SBPosition++;
+		BBPosition++;
+		EarlyPosition1++;
+		EarlyPosition2++;
+		MiddlePosition1++;
+		MiddlePosition2++;
+		MiddlePosition3++;
+		COPosition++;
+		ButtonPosition++;
+		break;
+
+
+	}
+	/*
+	SBPosition++;
+	BBPosition++;
+	MiddlePosition2++;
+	MiddlePosition3++;
+	COPosition++;
+	ButtonPosition++;
+
 	if (nPlayers > 6) {
 		EarlyPosition1++,
 		EarlyPosition2++;
 		MiddlePosition1++;
 	}
+	*/
+	
 	isSimulation = false;
 
 	HHline = "";
@@ -242,7 +321,103 @@ bool Ambient::IgnorePlayer(int _index) {
 
 //initialize var of position
 void Ambient::set_startitng_position() {
+	
+	switch (nPlayers){
+	case 2:
+		SBPosition = 0;
+		BBPosition = 1;
+		EarlyPosition1 = -10;
+		EarlyPosition2 = -10;
+		MiddlePosition1 = -10;
+		MiddlePosition2 = -10;
+		MiddlePosition3 = -10;
+		COPosition = -10;
+		ButtonPosition = -10;
+		break;
+	case 3:
+		SBPosition = 0;
+		BBPosition = 1;
+		EarlyPosition1 = -10;
+		EarlyPosition2 = -10;
+		MiddlePosition1 = -10;
+		MiddlePosition2 = -10;
+		MiddlePosition3 = -10;
+		COPosition = -10;
+		ButtonPosition = 2;
+			break;
+	case 4:
+		SBPosition = 0;
+		BBPosition = 1;
+		EarlyPosition1 = -10;
+		EarlyPosition2 = -10;
+		MiddlePosition1 = -10;
+		MiddlePosition2 = -10;
+		MiddlePosition3 = -10;
+		COPosition = 2;
+		ButtonPosition = 3;
+		break;
+	case 5:
+		SBPosition = 0;
+		BBPosition = 1;
+		EarlyPosition1 = -10;
+		EarlyPosition2 = -10;
+		MiddlePosition1 = -10;
+		MiddlePosition2 = -10;
+		MiddlePosition3 = 2;
+		COPosition = 3;
+		ButtonPosition = 4;
+		break;
+	case 6:
+		SBPosition = 0;
+		BBPosition = 1;
+		EarlyPosition1 = -10;
+		EarlyPosition2 = -10;
+		MiddlePosition1 = -10;
+		MiddlePosition2 = 2;
+		MiddlePosition3 = 3;
+		COPosition = 4;
+		ButtonPosition = 5;
+		break;
+	case 7:
+		SBPosition = 0;
+		BBPosition = 1;
+		EarlyPosition1 = -10;
+		EarlyPosition2 = -10;
+		MiddlePosition1 = 2;
+		MiddlePosition2 = 3;
+		MiddlePosition3 = 4;
+		COPosition = 5;
+		ButtonPosition = 6;
+		break;
+	case 8:
+		SBPosition = 0;
+		BBPosition = 1;
+		EarlyPosition1 = -10;
+		EarlyPosition2 = 2;
+		MiddlePosition1 = 3;
+		MiddlePosition2 = 4;
+		MiddlePosition3 = 5;
+		COPosition = 6;
+		ButtonPosition = 7;
+		break;
+	case 9:
+		SBPosition = 0;
+		BBPosition = 1;
+		EarlyPosition1 = 2;
+		EarlyPosition2 = 3;
+		MiddlePosition1 = 4;
+		MiddlePosition2 = 5;
+		MiddlePosition3 = 6;
+		COPosition = 7;
+		ButtonPosition = 8;
+		break;
+	
+	
+	
+	
+	}
 	//initialize var of position
+	/*
 	if (nPlayers > 6) {
 
 		SBPosition = 0;
@@ -268,6 +443,7 @@ void Ambient::set_startitng_position() {
 
 
 	}
+	*/
 
 
 };
@@ -513,13 +689,13 @@ void Ambient::handhistory_player_action(int i) {
 				}
 			}
 			else {
-				if (p[i].inSmallBlind) { HandHistory(p[i].myname + " posts small blind [€" + to_string(p[i].mybet) + "]"); }
+				if (p[i].inSmallBlind) { HandHistory(p[i].myname + " posts small blind [Â€" + to_string(p[i].mybet) + "]"); }
 				if (p[i].inBigBlind) {
 					if (p[SBPosition].mystack == 0 && PlayersInHand == 0) {
 						p[i].mybet = p[SBPosition].mybet;
 						p[i].UpdateMyStack();
 					}
-					HandHistory(p[i].myname + " posts big blind [€" + to_string(p[i].mybet) + "]");
+					HandHistory(p[i].myname + " posts big blind [Â€" + to_string(p[i].mybet) + "]");
 					HandHistory("** Dealing down cards **");
 					HandHistory("Dealt to " + p[0].myname + " [ " + *p[0].MyCards[0] + ", " + *p[0].MyCards[1] + " ]");
 
@@ -534,8 +710,8 @@ void Ambient::handhistory_player_action(int i) {
 				else if (p[i].inBigBlind) { HandHistory(p[i].myname + " posts big blind [" + to_string(p[i].mybet) + "]"); }
 			}
 			else {
-				if (p[i].inSmallBlind) { HandHistory(p[i].myname + " posts small blind [€" + to_string(p[i].mybet) + "]"); }
-				else if (p[i].inBigBlind) { HandHistory(p[i].myname + " posts big blind [€" + to_string(p[i].mybet) + "]"); }
+				if (p[i].inSmallBlind) { HandHistory(p[i].myname + " posts small blind [Â€" + to_string(p[i].mybet) + "]"); }
+				else if (p[i].inBigBlind) { HandHistory(p[i].myname + " posts big blind [Â€" + to_string(p[i].mybet) + "]"); }
 
 			};			
 			break;
@@ -548,7 +724,7 @@ void Ambient::handhistory_player_action(int i) {
 				HandHistory(p[i].myname + " calls [" + to_string(p[i].AmountToCall) + "]");
 			}
 			else {
-				HandHistory(p[i].myname + " calls [€" + to_string(p[i].AmountToCall) + "]");
+				HandHistory(p[i].myname + " calls [Â€" + to_string(p[i].AmountToCall) + "]");
 			};
 
 			break;
@@ -557,7 +733,7 @@ void Ambient::handhistory_player_action(int i) {
 				HandHistory(p[i].myname + " calls [" + to_string(p[i].AmountToCall) + "]");
 			}
 			else {
-				HandHistory(p[i].myname + " calls [€" + to_string(p[i].AmountToCall) + "]");
+				HandHistory(p[i].myname + " calls [Â€" + to_string(p[i].AmountToCall) + "]");
 			}
 			break;
 		case State::Bet:
@@ -565,7 +741,7 @@ void Ambient::handhistory_player_action(int i) {
 				HandHistory(p[i].myname + " bets [" + to_string(p[i].myraise) + "]");
 			}
 			else {
-				HandHistory(p[i].myname + " bets [€" + to_string(p[i].myraise) + "]");
+				HandHistory(p[i].myname + " bets [Â€" + to_string(p[i].myraise) + "]");
 
 			}
 			break;
@@ -574,7 +750,7 @@ void Ambient::handhistory_player_action(int i) {
 				HandHistory(p[i].myname + " raises [" + to_string(p[i].myraise) + "]");
 			}
 			else {
-				HandHistory(p[i].myname + " raises [€" + to_string(p[i].myraise) + "]");
+				HandHistory(p[i].myname + " raises [Â€" + to_string(p[i].myraise) + "]");
 
 			}
 			break;
@@ -583,7 +759,7 @@ void Ambient::handhistory_player_action(int i) {
 				HandHistory(p[i].myname + " raises [" + to_string(p[i].myraise) + "]");
 			}
 			else {
-				HandHistory(p[i].myname + " raises [€" + to_string(p[i].myraise) + "]");
+				HandHistory(p[i].myname + " raises [Â€" + to_string(p[i].myraise) + "]");
 
 			}
 
@@ -623,7 +799,7 @@ void Ambient::handhistory_new_hand() {
 	if (bTournament == false) {
 		HandHistory("#Game No : " + to_string(Handnumber));
 		HandHistory("***** 888.it Hand History for Game " + to_string(Handnumber) + " *****");
-		HandHistory("€" + to_string(SBsize) + "/€" + to_string(BBsize) + " Blinds No Limit Holdem - *** 01 01 2021 00:00:00");
+		HandHistory("Â€" + to_string(SBsize) + "/Â€" + to_string(BBsize) + " Blinds No Limit Holdem - *** 01 01 2021 00:00:00");
 		HandHistory("Table EDD " + to_string(Table) + " Max(Real Money)");
 		for (int i = 0; i < nPlayers; i++) {
 			if (p[i].inButton) { 
@@ -633,7 +809,7 @@ void Ambient::handhistory_new_hand() {
 		}
 		HandHistory("Total number of players : " + to_string(nPlayers));
 		for (int i = 0; i < nPlayers; i++) {
-			HandHistory("Seat " + to_string(p[i].myseat) + ": " + p[i].myname + " ( €" + to_string(p[i].mystack) + " )");
+			HandHistory("Seat " + to_string(p[i].myseat) + ": " + p[i].myname + " ( Â€" + to_string(p[i].mystack) + " )");
 		}
 	}
 };
@@ -1022,7 +1198,7 @@ void Ambient::pay_winners() {
 					p[i].TakePrize(p[i].myprize);
 					p[i].winner = true;
 					if (bTournament == true) { HandHistory(p[i].myname + " collected [ " + to_string(p[i].myprize) + " ]"); }
-					else { HandHistory(p[i].myname + " collected [ €" + to_string(p[i].myprize) + " ]"); };
+					else { HandHistory(p[i].myname + " collected [ Â€" + to_string(p[i].myprize) + " ]"); };
 			}
 		}
 
