@@ -2,7 +2,7 @@ to use just create new empty project console and add all files.
 
 the open simulator is a c ++ class that can be used in any project by simply creating a simulator object and using its functions and variables.
 
-the actual entry point is start_simulation (nplayer), but any personal function can be created as an entry point, so you can use it as a dll for a bot or any project.
+the actual entry point is start_simulation (nplayer), but any personal function can be created as an entry point, so you can use it as a dll or any project.
 
 what it does is simulate the game of texas hold em no limit poker very quickly, so after writing the logic and run the simulation, it writes HH to import into poker track or similar to analyze what happened, (works fine with pt 4.15.28)
 
