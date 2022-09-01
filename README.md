@@ -13,8 +13,9 @@ the real potential comes from manipulating simulations programmatically, so you 
 the best way to understand it is to insert a break point at the beginning in visual studio, then run a few hands and study the code, which however is only very simple native c ++ code (it's my first "serious" project with c ++)
 
 things to do in the future:
-- read oppl or ohf profiles
+- read oppl or ohf profiles for opponents
 - create gui for manual game
+- tournaments structures
 - speed up even more
 
 on a personal level it is something I do in my spare time for fun, so it may take many years to complete, however anyone who wants to participate is welcome.
