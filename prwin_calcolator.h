@@ -3,7 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include "CHandStrength.h"
-
+#include <vector>
 
 class prwin_calcolator
 {
@@ -32,7 +32,6 @@ private:
 
 
 	int BetRound = 1;
-	int nSuited = 0;
 
 	int nIterations = 0;
 	int nWin = 0;
@@ -61,6 +60,10 @@ private:
 	string turn = "";
 	string river = "";
 
+	int nSuited = 1;
+	char preflop_card1 = '-';
+	char preflop_card2 = '-';
+
 	int nPlayers = 0;
 	int pStrength[9] = { -100000 };
 
@@ -78,8 +81,41 @@ public:
 	double Flop_precalc_prwin(int FlopNumber, int nPlayers);
 	double Turn_precalc_prwin(int TurnNumber, int nPlayers);
 	double River_precalc_prwin(int RiverNumber, int nPlayers);
+	int set_preflopnumber(string card1,string card2);
+	void set_nSuited(string _pCard1, string _pCard2, string _flop1, string _flop2, string _flop3, string _turn, string _river);
+
+	//tools
+	static void GetPrwin();
+	static void WritePrwinALL();
+	static void WriteAllPot();
+	static void WriteAllStack();
+	static void MinPrwin();
+	static void generateCode();
+
+	void findPrwin();
+	static void GetPrwinINVERSO();
+	void findPrwinINVERSO();
+	void GetPrwinAutoINVERSO(string Cfile = "ManualPrwinC++.txt", string OpplFilestring = "ManualPrwinOppl.txt", string card1 = "", string card2 = "", string card3 = "", string card4 = "", string card5 = "", string card6 = "", string card7 = "");
+	
+	void getALLprwin();
+	void getALLprwinMANUAL();
+
+	void findPrwinAUTO_wins(string wins[], int betround = 1, double targetprwin = 0.5);
+	void GetPrwinAuto_wins(string wins[], string card1, string card2, string card3, string card4, string card5, string card6, string card7);
 
 
+	//prov
+	void test();
+	void GetPrwinAuto(string Cfile = "ManualPrwinC++.txt", string OpplFilestring = "ManualPrwinOppl.txt",string card1 ="", string card2 = "", string card3 = "", string card4 = "", string card5 = "", string card6 = "", string card7 = "");
+
+	//write code on txt scripts
+	void WriteCodeForPreflopNumber();
+	void WriteCodeForFlopNumber();
+
+	void WriteTxt();
+
+	static double GetMinPrwinBasedOnStack(int _StackSize);
+	static double adjust_prwin(double prwin_single, int num_opponents, double k);
 
 
 };

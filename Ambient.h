@@ -4,22 +4,27 @@
 #include "prwin_calcolator.h"
 #include <iostream>
 #include <fstream>
+#include <vector>
+#include "HHWriter.h"
 
 
-
-
-
-
-using namespace std;
 
 class Ambient {
-
+	
 public:
-	const int SeatsMaxNumber = 9;
+	Ambient();
+	Ambient(const Ambient& other) = default; 
+	~Ambient();
+
+	const int SeatsMaxNumber = 8;
 
 	int nPlayers = 9;
+	vector<Player> p;
+	HHWriter* HH;
 
-	Player* p = new Player[nPlayers];
+	string HH_File = "HandHistory.txt";
+
+
 	string NewDeck[52] = { "Ad", "Kd", "Qd", "Jd","Td", "9d", "8d", "7d", "6d", "5d", "4d", "3d", "2d" ,
 				  "Ac", "Kc", "Qc", "Jc","Tc", "9c", "8c", "7c", "6c", "5c", "4c", "3c", "2c" ,
 				  "As", "Ks", "Qs", "Js","Ts", "9s", "8s", "7s", "6s", "5s", "4s", "3s", "2s" ,
@@ -29,22 +34,37 @@ public:
 
 	Player prwin[10];
 
+	int TotChipsWon = 0;
+	int TotPlayers = 50;
+
 	//Manual modify only these variables
 
 	int NumberOfSimulation = 10000;	
 	bool bHandHistory = 1;
-	bool SingleSituation = 0;
+	bool SingleSituation = 1;
 
 	bool showhandnumber = 1;
-	bool bTournament = false;
+	int showhand_frequency = 1;
+
 	bool SaveLastHandNumber = false;
-	bool PT_autoimport = 1;
+	bool PT_autoimport = 0;
 
-	//--------------------------------------
-	int IncreaseBlindEveryHand = 10;
-	int TournamentSpeed = 0;
+	bool bNeverGoOut = false;
+	int PlayerPosition = 0;
+	//Tournament Var--------------------------------------
+	bool bTournament = 1;
 
-	int PlayersStartingStack = 3000;	
+	string LastPlayerHand = "";
+	int PlayerLastStack = 0;
+
+	int IncreaseBlindEveryHand = 8; //how many hand beforw increase blind level
+	bool doubleBlind = 0;  //event if is not tournament apply the tournament structure
+
+	int BlindLevel = 1; //firs level is 1.
+
+	int TournamentHandCount = 0; //incresead by one every hand, to know while set new blind level
+	int HHprize = 0;
+	
 
 	int SBPosition = 0;
 	int BBPosition = 0;
@@ -57,13 +77,12 @@ public:
 	int ButtonPosition = 0;	
 	
 
-
-	int BBsize = 10;
-	int SBsize = 5;
+	int PlayersStartingStack = 50;
+	int BBsize = 100;
+	int SBsize = 50;
 	int ANTEsize = 2;
 	int BetRound = 0;
 
-	string HHline = "";
 
 	//table information
 	int PotSize = 0;
@@ -101,6 +120,7 @@ public:
 	int SidePotWinners2 = 0;
 
 	bool isSimulation = false;
+	bool realHand = true;
 
 	int NumberOfWinners = 0;
 	int Prize = 0;
@@ -113,6 +133,8 @@ public:
 	bool bSeats[10] = { false };
 	bool newround = false;
 	bool bNewOrbit = false;
+	bool bVirtualSimulation = false;
+
 
 	const int* PlayersInvested[10] = { 0 };
 	const int* PlayersStack[10] = { 0 };
@@ -122,11 +144,9 @@ public:
 	const string* PlayersName[10] = { 0 };
 	const State* PlayersState[10] = { 0 };
 
+	
 
-
-	ifstream hand;
-	ofstream handN;
-	string HH_File = "HandHistory.txt";
+	
 
 
 
@@ -142,10 +162,8 @@ public:
 
 	bool NewOrbit();
 	bool IgnorePlayer(int _index);
-	void remove_from_pot();
 	
 	void HandReset();
-	void HandHistory(string _text);
 
 
 	void set_pointers();
@@ -157,10 +175,14 @@ public:
 	void Turn();
 	void River();
 	void Showdown();
-	void Handplay();
+	virtual void Handplay();
 
 
 	void start_simulation(int _nPlayers = 9 , int _NumberOfSimulation = 0);
+	int Play_Tournament(int i, int _TotPlayers = 50, int _MaxSeatNumber = 8, int _NumberOfSimulation = 1000000);
+	void Simulate_Tournaments();
+	void SimulateCash(int _nPlayers=8, int _NumberOfSimulation=10000);
+
 	void start_hand();
 	void players_handreset();
 
@@ -169,25 +191,33 @@ public:
 	void Tournament_Finish();
 	void rebuy_options();
 
-	void handhistory_new_hand();
-	void handhistory_player_action(int i);
-
-	void handhistory_finish();
 	void goto_betround();
-
 	void reset_players_state();
-	void load_last_handumber();
-	void save_last_handumber();
+
 
 	void calc_player_at_showdown();
 	void calc_prize();
+	void calc_HHprize();
 	void calc_max_handstrength();
 	void calc_number_of_winners();
 
 	void set_players_card();
 	void set_Preflop_PlayerVar();
 
-	void set_HandHistory(bool _bool, string _file = "HandHistory.txt");
 	void set_startitng_position();
 	void reset_action_counts();
+	void simulate_random_nplayers();
+	int generateRandomStack();
+
+	void log(string line) {
+		ofstream a;
+		a.open("LOG.txt",ios::app);
+		a << line<<endl;
+		a.close();
+
+	}
+
+	void sortPairsByDouble(vector<pair<double, string>>& pairs);
+	bool hasDuplicates(const std::vector<std::string>&array);
+
 };

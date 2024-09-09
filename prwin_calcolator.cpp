@@ -9,6 +9,40 @@ double prwin_calcolator::calc_prwin(string _pCard1, string _pCard2, string _flop
 	prwin = 0;
 	nWin = 0;
 
+	//check if some card are equal
+	{if ((_pCard1 == _pCard2 && _pCard2 != "") ||
+		(_pCard1 == _flop1 && _flop1 != "") ||
+		(_pCard1 == _flop2 && _flop2 != "") ||
+		(_pCard1 == _flop3 && _flop3 != "") ||
+		(_pCard1 == _turn && _turn != "") ||
+		(_pCard1 == _river && _river != "") ||
+		(_pCard2 == _flop1 && _flop1 != "") ||
+		(_pCard2 == _flop2 && _flop2 != "") ||
+		(_pCard2 == _flop3 && _flop3 != "") ||
+		(_pCard2 == _turn && _turn != "") ||
+		(_pCard2 == _river && _river != "") ||
+		(_flop1 == _flop2 && _flop2 != "") ||
+		(_flop1 == _flop3 && _flop3 != "") ||
+		(_flop1 == _turn && _turn != "") ||
+		(_flop1 == _river && _river != "") ||
+		(_flop2 == _flop3 && _flop3 != "") ||
+		(_flop2 == _turn && _turn != "") ||
+		(_flop2 == _river && _river != "") ||
+		(_flop3 == _turn && _turn != "") ||
+		(_flop3 == _river && _river != "") ||
+		(_turn == _river && _river != ""))return 0;
+}
+
+
+
+	//if is preflop use precalculated prwin
+	if (_flop1 == "") {
+		PreflopNumber = set_preflopnumber(_pCard1, _pCard2);
+		prwin = Preflop_precalc_prwin(PreflopNumber, _PlayersInHand);
+		PreflopNumber = 0;
+		return prwin;
+	}
+
 
 	for (int i = 0; i < nIterations; i++) {
 
@@ -26,6 +60,40 @@ double prwin_calcolator::calc_prwin(string _pCard1, string _pCard2, string _flop
 	return prwin;
 
 }
+void prwin_calcolator::set_nSuited(string _pCard1, string _pCard2, string _flop1, string _flop2, string _flop3, string _turn, string _river) {
+
+	int card1s = 0;
+	int card2s = 0;
+	if (_pCard1[1] == _pCard2[1]) {
+		nSuited = 2;
+		if (_pCard1[1] == _flop1[1])nSuited++;
+		if (_pCard1[1] == _flop2[1])nSuited++;
+		if (_pCard1[1] == _flop3[1])nSuited++;
+		if (_pCard1[1] == _turn[1])nSuited++;
+		if (_pCard1[1] == _river[1])nSuited++;
+	}
+	if (_pCard1[1] != _pCard2[1]) {
+		nSuited = 1;
+
+		if (_pCard1[1] == _flop1[1])card1s++;
+		if (_pCard1[1] == _flop2[1])card1s++;
+		if (_pCard1[1] == _flop3[1])card1s++;
+		if (_pCard1[1] == _turn[1])card1s++;
+		if (_pCard1[1] == _river[1])card1s++;
+
+		if (_pCard2[1] == _flop1[1])card2s++;
+		if (_pCard2[1] == _flop2[1])card2s++;
+		if (_pCard2[1] == _flop3[1])card2s++;
+		if (_pCard2[1] == _turn[1])card2s++;
+		if (_pCard2[1] == _river[1])card2s++;
+
+		if (card1s >= card2s)nSuited += card1s;
+		if (card2s > card1s)nSuited += card2s;
+
+	}
+
+};
+
 
 //create new deck keeping only the known cards
 void prwin_calcolator::MixDeck(string _pCard1, string _pCard2, string _flop1, string _flop2, string _flop3, string _turn, string _river)
@@ -72,7 +140,6 @@ void prwin_calcolator::MixDeck(string _pCard1, string _pCard2, string _flop1, st
 
 
 };
-
 //calc the stength of players
 void prwin_calcolator::set_player_strength() {
 
@@ -145,7 +212,6 @@ void prwin_calcolator::set_player_strength() {
 
 
 }
-
 //set the players card (0 and 1 is always hero cards , 23456 always post flop) 
 void prwin_calcolator::set_players_card() {
 
@@ -260,7 +326,6 @@ void prwin_calcolator::set_players_card() {
 	}
 
 }
-
 //compare the hand strength of the players to decide if won
 bool prwin_calcolator::winner() {
 
@@ -280,7 +345,6 @@ bool prwin_calcolator::winner() {
 	//if (pStrength[0] != Strength) { prlos++; }
 	return false;
 };
-
 //reset all player cards
 void prwin_calcolator::reset_player_cards() {
 
@@ -306,7 +370,6 @@ void prwin_calcolator::reset_player_cards() {
 
 
 };
-
 //return pre calc prwin preflop without montecarlo simulation (very fast!)
 double prwin_calcolator::Preflop_precalc_prwin(int PreflopNumber,int nPlayers) {
 	switch (PreflopNumber) {
@@ -4897,4 +4960,2665 @@ double prwin_calcolator::River_precalc_prwin(int RiverNumber, int nPlayers) {
 	return 0;
 }
 
+int prwin_calcolator::set_preflopnumber(string card1, string card2) {
+	if (card1[0] == 'A' && card2[0] == 'A') {
+		preflop_card1 = 'A';
+		preflop_card2 = 'A';
+		nSuited = 1;
+		return 1;
+	}
+	if ((card1[0] == 'A' || card2[0] == 'A') && (card1[0] == 'K' || card2[0] == 'K')) {
+		preflop_card1 = 'A';
+		preflop_card2 = 'K';
+		nSuited = 1;
+		return 2;
+	}
+	if ((card1[0] == 'A' || card2[0] == 'A') && (card1[0] == 'K' || card2[0] == 'K') && card1[1] == card2[1]) {
+		preflop_card1 = 'A';
+		preflop_card2 = 'K';
+		nSuited = 2;
+		return 3;
+	}
+	if ((card1[0] == 'A' || card2[0] == 'A') && (card1[0] == 'Q' || card2[0] == 'Q')) {
+		preflop_card1 = 'A';
+		preflop_card2 = 'Q';
+		nSuited = 1;
+		return 4;
+	}
+	if ((card1[0] == 'A' || card2[0] == 'A') && (card1[0] == 'Q' || card2[0] == 'Q') && card1[1] == card2[1]) {
+		preflop_card1 = 'A';
+		preflop_card2 = 'Q';
+		nSuited = 2;
+		return 5;
+	}
+	if ((card1[0] == 'A' || card2[0] == 'A') && (card1[0] == 'J' || card2[0] == 'J')) {
+		preflop_card1 = 'A';
+		preflop_card2 = 'J';
+		nSuited = 1;
+		return 6;
+	}
+	if ((card1[0] == 'A' || card2[0] == 'A') && (card1[0] == 'J' || card2[0] == 'J') && card1[1] == card2[1]) {
+		preflop_card1 = 'A';
+		preflop_card2 = 'J';
+		nSuited = 2;
+		return 7;
+	}
+	if ((card1[0] == 'A' || card2[0] == 'A') && (card1[0] == 'T' || card2[0] == 'T')) {
+		preflop_card1 = 'A';
+		preflop_card2 = 'T';
+		nSuited = 1;
+		return 8;
+	}
+	if ((card1[0] == 'A' || card2[0] == 'A') && (card1[0] == 'T' || card2[0] == 'T') && card1[1] == card2[1]) {
+		preflop_card1 = 'A';
+		preflop_card2 = 'T';
+		nSuited = 2;
+		return 9;
+	}
+	if ((card1[0] == 'A' || card2[0] == 'A') && (card1[0] == '9' || card2[0] == '9')) {
+		preflop_card1 = 'A';
+		preflop_card2 = '9';
+		nSuited = 1;
+		return 10;
+	}
+	if ((card1[0] == 'A' || card2[0] == 'A') && (card1[0] == '9' || card2[0] == '9') && card1[1] == card2[1]) {
+		preflop_card1 = 'A';
+		preflop_card2 = '9';
+		nSuited = 2;
+		return 11;
+	}
+	if ((card1[0] == 'A' || card2[0] == 'A') && (card1[0] == '8' || card2[0] == '8')) {
+		preflop_card1 = 'A';
+		preflop_card2 = '8';
+		nSuited = 1;
+		return 12;
+	}
+	if ((card1[0] == 'A' || card2[0] == 'A') && (card1[0] == '8' || card2[0] == '8') && card1[1] == card2[1]) {
+		preflop_card1 = 'A';
+		preflop_card2 = '8';
+		nSuited = 2;
+		return 13;
+	}
+	if ((card1[0] == 'A' || card2[0] == 'A') && (card1[0] == '7' || card2[0] == '7')) {
+		preflop_card1 = 'A';
+		preflop_card2 = '7';
+		nSuited = 1;
+		return 14;
+	}
+	if ((card1[0] == 'A' || card2[0] == 'A') && (card1[0] == '7' || card2[0] == '7') && card1[1] == card2[1]) {
+		preflop_card1 = 'A';
+		preflop_card2 = '7';
+		nSuited = 2;
+		return 15;
+	}
+	if ((card1[0] == 'A' || card2[0] == 'A') && (card1[0] == '6' || card2[0] == '6')) {
+		preflop_card1 = 'A';
+		preflop_card2 = '6';
+		nSuited = 1;
+		return 16;
+	}
+	if ((card1[0] == 'A' || card2[0] == 'A') && (card1[0] == '6' || card2[0] == '6') && card1[1] == card2[1]) {
+		preflop_card1 = 'A';
+		preflop_card2 = '6';
+		nSuited = 2;
+		return 17;
+	}
+	if ((card1[0] == 'A' || card2[0] == 'A') && (card1[0] == '5' || card2[0] == '5')) {
+		preflop_card1 = 'A';
+		preflop_card2 = '5';
+		nSuited = 1;
+		return 18;
+	}
+	if ((card1[0] == 'A' || card2[0] == 'A') && (card1[0] == '5' || card2[0] == '5') && card1[1] == card2[1]) {
+		preflop_card1 = 'A';
+		preflop_card2 = '5';
+		nSuited = 2;
+		return 19;
+	}
+	if ((card1[0] == 'A' || card2[0] == 'A') && (card1[0] == '4' || card2[0] == '4')) {
+		preflop_card1 = 'A';
+		preflop_card2 = '4';
+		nSuited = 1;
+		return 20;
+	}
+	if ((card1[0] == 'A' || card2[0] == 'A') && (card1[0] == '4' || card2[0] == '4') && card1[1] == card2[1]) {
+		preflop_card1 = 'A';
+		preflop_card2 = '4';
+		nSuited = 2;
+		return 21;
+	}
+	if ((card1[0] == 'A' || card2[0] == 'A') && (card1[0] == '3' || card2[0] == '3')) {
+		preflop_card1 = 'A';
+		preflop_card2 = '3';
+		nSuited = 1;
+		return 22;
+	}
+	if ((card1[0] == 'A' || card2[0] == 'A') && (card1[0] == '3' || card2[0] == '3') && card1[1] == card2[1]) {
+		preflop_card1 = 'A';
+		preflop_card2 = '3';
+		nSuited = 2;
+		return 23;
+	}
+	if ((card1[0] == 'A' || card2[0] == 'A') && (card1[0] == '2' || card2[0] == '2')) {
+		preflop_card1 = 'A';
+		preflop_card2 = '2';
+		nSuited = 1;
+		return 24;
+	}
+	if ((card1[0] == 'A' || card2[0] == 'A') && (card1[0] == '2' || card2[0] == '2') && card1[1] == card2[1]) {
+		preflop_card1 = 'A';
+		preflop_card2 = '2';
+		nSuited = 2;
+		return 25;
+	}
+	if (card1[0] == 'K' && card2[0] == 'K') {
+		preflop_card1 = 'K';
+		preflop_card2 = 'K';
+		nSuited = 1;
+		return 26;
+	}
+	if ((card1[0] == 'K' || card2[0] == 'K') && (card1[0] == 'Q' || card2[0] == 'Q')) {
+		preflop_card1 = 'K';
+		preflop_card2 = 'Q';
+		nSuited = 1;
+		return 27;
+	}
+	if ((card1[0] == 'K' || card2[0] == 'K') && (card1[0] == 'Q' || card2[0] == 'Q') && card1[1] == card2[1]) {
+		preflop_card1 = 'K';
+		preflop_card2 = 'Q';
+		nSuited = 2;
+		return 28;
+	}
+	if ((card1[0] == 'K' || card2[0] == 'K') && (card1[0] == 'J' || card2[0] == 'J')) {
+		preflop_card1 = 'K';
+		preflop_card2 = 'J';
+		nSuited = 1;
+		return 29;
+	}
+	if ((card1[0] == 'K' || card2[0] == 'K') && (card1[0] == 'J' || card2[0] == 'J') && card1[1] == card2[1]) {
+		preflop_card1 = 'K';
+		preflop_card2 = 'J';
+		nSuited = 2;
+		return 30;
+	}
+	if ((card1[0] == 'K' || card2[0] == 'K') && (card1[0] == 'T' || card2[0] == 'T')) {
+		preflop_card1 = 'K';
+		preflop_card2 = 'T';
+		nSuited = 1;
+		return 31;
+	}
+	if ((card1[0] == 'K' || card2[0] == 'K') && (card1[0] == 'T' || card2[0] == 'T') && card1[1] == card2[1]) {
+		preflop_card1 = 'K';
+		preflop_card2 = 'T';
+		nSuited = 2;
+		return 32;
+	}
+	if ((card1[0] == 'K' || card2[0] == 'K') && (card1[0] == '9' || card2[0] == '9')) {
+		preflop_card1 = 'K';
+		preflop_card2 = '9';
+		nSuited = 1;
+		return 33;
+	}
+	if ((card1[0] == 'K' || card2[0] == 'K') && (card1[0] == '9' || card2[0] == '9') && card1[1] == card2[1]) {
+		preflop_card1 = 'K';
+		preflop_card2 = '9';
+		nSuited = 2;
+		return 34;
+	}
+	if ((card1[0] == 'K' || card2[0] == 'K') && (card1[0] == '8' || card2[0] == '8')) {
+		preflop_card1 = 'K';
+		preflop_card2 = '8';
+		nSuited = 1;
+		return 35;
+	}
+	if ((card1[0] == 'K' || card2[0] == 'K') && (card1[0] == '8' || card2[0] == '8') && card1[1] == card2[1]) {
+		preflop_card1 = 'K';
+		preflop_card2 = '8';
+		nSuited = 2;
+		return 36;
+	}
+	if ((card1[0] == 'K' || card2[0] == 'K') && (card1[0] == '7' || card2[0] == '7')) {
+		preflop_card1 = 'K';
+		preflop_card2 = '7';
+		nSuited = 1;
+		return 37;
+	}
+	if ((card1[0] == 'K' || card2[0] == 'K') && (card1[0] == '7' || card2[0] == '7') && card1[1] == card2[1]) {
+		preflop_card1 = 'K';
+		preflop_card2 = '7';
+		nSuited = 2;
+		return 38;
+	}
+	if ((card1[0] == 'K' || card2[0] == 'K') && (card1[0] == '6' || card2[0] == '6')) {
+		preflop_card1 = 'K';
+		preflop_card2 = '6';
+		nSuited = 1;
+		return 39;
+	}
+	if ((card1[0] == 'K' || card2[0] == 'K') && (card1[0] == '6' || card2[0] == '6') && card1[1] == card2[1]) {
+		preflop_card1 = 'K';
+		preflop_card2 = '6';
+		nSuited = 2;
+		return 40;
+	}
+	if ((card1[0] == 'K' || card2[0] == 'K') && (card1[0] == '5' || card2[0] == '5')) {
+		preflop_card1 = 'K';
+		preflop_card2 = '5';
+		nSuited = 1;
+		return 41;
+	}
+	if ((card1[0] == 'K' || card2[0] == 'K') && (card1[0] == '5' || card2[0] == '5') && card1[1] == card2[1]) {
+		preflop_card1 = 'K';
+		preflop_card2 = '5';
+		nSuited = 2;
+		return 42;
+	}
+	if ((card1[0] == 'K' || card2[0] == 'K') && (card1[0] == '4' || card2[0] == '4')) {
+		preflop_card1 = 'K';
+		preflop_card2 = '4';
+		nSuited = 1;
+		return 43;
+	}
+	if ((card1[0] == 'K' || card2[0] == 'K') && (card1[0] == '4' || card2[0] == '4') && card1[1] == card2[1]) {
+		preflop_card1 = 'K';
+		preflop_card2 = '4';
+		nSuited = 2;
+		return 44;
+	}
+	if ((card1[0] == 'K' || card2[0] == 'K') && (card1[0] == '3' || card2[0] == '3')) {
+		preflop_card1 = 'K';
+		preflop_card2 = '3';
+		nSuited = 1;
+		return 45;
+	}
+	if ((card1[0] == 'K' || card2[0] == 'K') && (card1[0] == '3' || card2[0] == '3') && card1[1] == card2[1]) {
+		preflop_card1 = 'K';
+		preflop_card2 = '3';
+		nSuited = 2;
+		return 46;
+	}
+	if ((card1[0] == 'K' || card2[0] == 'K') && (card1[0] == '2' || card2[0] == '2')) {
+		preflop_card1 = 'K';
+		preflop_card2 = '2';
+		nSuited = 1;
+		return 47;
+	}
+	if ((card1[0] == 'K' || card2[0] == 'K') && (card1[0] == '2' || card2[0] == '2') && card1[1] == card2[1]) {
+		preflop_card1 = 'K';
+		preflop_card2 = '2';
+		nSuited = 2;
+		return 48;
+	}
+	if (card1[0] == 'Q' && card2[0] == 'Q') {
+		preflop_card1 = 'Q';
+		preflop_card2 = 'Q';
+		nSuited = 1;
+		return 49;
+	}
+	if ((card1[0] == 'Q' || card2[0] == 'Q') && (card1[0] == 'J' || card2[0] == 'J')) {
+		preflop_card1 = 'Q';
+		preflop_card2 = 'J';
+		nSuited = 1;
+		return 50;
+	}
+	if ((card1[0] == 'Q' || card2[0] == 'Q') && (card1[0] == 'J' || card2[0] == 'J') && card1[1] == card2[1]) {
+		preflop_card1 = 'Q';
+		preflop_card2 = 'J';
+		nSuited = 2;
+		return 51;
+	}
+	if ((card1[0] == 'Q' || card2[0] == 'Q') && (card1[0] == 'T' || card2[0] == 'T')) {
+		preflop_card1 = 'Q';
+		preflop_card2 = 'T';
+		nSuited = 1;
+		return 52;
+	}
+	if ((card1[0] == 'Q' || card2[0] == 'Q') && (card1[0] == 'T' || card2[0] == 'T') && card1[1] == card2[1]) {
+		preflop_card1 = 'Q';
+		preflop_card2 = 'T';
+		nSuited = 2;
+		return 53;
+	}
+	if ((card1[0] == 'Q' || card2[0] == 'Q') && (card1[0] == '9' || card2[0] == '9')) {
+		preflop_card1 = 'Q';
+		preflop_card2 = '9';
+		nSuited = 1;
+		return 54;
+	}
+	if ((card1[0] == 'Q' || card2[0] == 'Q') && (card1[0] == '9' || card2[0] == '9') && card1[1] == card2[1]) {
+		preflop_card1 = 'Q';
+		preflop_card2 = '9';
+		nSuited = 2;
+		return 55;
+	}
+	if ((card1[0] == 'Q' || card2[0] == 'Q') && (card1[0] == '8' || card2[0] == '8')) {
+		preflop_card1 = 'Q';
+		preflop_card2 = '8';
+		nSuited = 1;
+		return 56;
+	}
+	if ((card1[0] == 'Q' || card2[0] == 'Q') && (card1[0] == '8' || card2[0] == '8') && card1[1] == card2[1]) {
+		preflop_card1 = 'Q';
+		preflop_card2 = '8';
+		nSuited = 2;
+		return 57;
+	}
+	if ((card1[0] == 'Q' || card2[0] == 'Q') && (card1[0] == '7' || card2[0] == '7')) {
+		preflop_card1 = 'Q';
+		preflop_card2 = '7';
+		nSuited = 1;
+		return 58;
+	}
+	if ((card1[0] == 'Q' || card2[0] == 'Q') && (card1[0] == '7' || card2[0] == '7') && card1[1] == card2[1]) {
+		preflop_card1 = 'Q';
+		preflop_card2 = '7';
+		nSuited = 2;
+		return 59;
+	}
+	if ((card1[0] == 'Q' || card2[0] == 'Q') && (card1[0] == '6' || card2[0] == '6')) {
+		preflop_card1 = 'Q';
+		preflop_card2 = '6';
+		nSuited = 1;
+		return 60;
+	}
+	if ((card1[0] == 'Q' || card2[0] == 'Q') && (card1[0] == '6' || card2[0] == '6') && card1[1] == card2[1]) {
+		preflop_card1 = 'Q';
+		preflop_card2 = '6';
+		nSuited = 2;
+		return 61;
+	}
+	if ((card1[0] == 'Q' || card2[0] == 'Q') && (card1[0] == '5' || card2[0] == '5')) {
+		preflop_card1 = 'Q';
+		preflop_card2 = '5';
+		nSuited = 1;
+		return 62;
+	}
+	if ((card1[0] == 'Q' || card2[0] == 'Q') && (card1[0] == '5' || card2[0] == '5') && card1[1] == card2[1]) {
+		preflop_card1 = 'Q';
+		preflop_card2 = '5';
+		nSuited = 2;
+		return 63;
+	}
+	if ((card1[0] == 'Q' || card2[0] == 'Q') && (card1[0] == '4' || card2[0] == '4')) {
+		preflop_card1 = 'Q';
+		preflop_card2 = '4';
+		nSuited = 1;
+		return 64;
+	}
+	if ((card1[0] == 'Q' || card2[0] == 'Q') && (card1[0] == '4' || card2[0] == '4') && card1[1] == card2[1]) {
+		preflop_card1 = 'Q';
+		preflop_card2 = '4';
+		nSuited = 2;
+		return 65;
+	}
+	if ((card1[0] == 'Q' || card2[0] == 'Q') && (card1[0] == '3' || card2[0] == '3')) {
+		preflop_card1 = 'Q';
+		preflop_card2 = '3';
+		nSuited = 1;
+		return 66;
+	}
+	if ((card1[0] == 'Q' || card2[0] == 'Q') && (card1[0] == '3' || card2[0] == '3') && card1[1] == card2[1]) {
+		preflop_card1 = 'Q';
+		preflop_card2 = '3';
+		nSuited = 2;
+		return 67;
+	}
+	if ((card1[0] == 'Q' || card2[0] == 'Q') && (card1[0] == '2' || card2[0] == '2')) {
+		preflop_card1 = 'Q';
+		preflop_card2 = '2';
+		nSuited = 1;
+		return 68;
+	}
+	if ((card1[0] == 'Q' || card2[0] == 'Q') && (card1[0] == '2' || card2[0] == '2') && card1[1] == card2[1]) {
+		preflop_card1 = 'Q';
+		preflop_card2 = '2';
+		nSuited = 2;
+		return 69;
+	}
+	if (card1[0] == 'J' && card2[0] == 'J') {
+		preflop_card1 = 'J';
+		preflop_card2 = 'J';
+		nSuited = 1;
+		return 70;
+	}
+	if ((card1[0] == 'J' || card2[0] == 'J') && (card1[0] == 'T' || card2[0] == 'T')) {
+		preflop_card1 = 'J';
+		preflop_card2 = 'T';
+		nSuited = 1;
+		return 71;
+	}
+	if ((card1[0] == 'J' || card2[0] == 'J') && (card1[0] == 'T' || card2[0] == 'T') && card1[1] == card2[1]) {
+		preflop_card1 = 'J';
+		preflop_card2 = 'T';
+		nSuited = 2;
+		return 72;
+	}
+	if ((card1[0] == 'J' || card2[0] == 'J') && (card1[0] == '9' || card2[0] == '9')) {
+		preflop_card1 = 'J';
+		preflop_card2 = '9';
+		nSuited = 1;
+		return 73;
+	}
+	if ((card1[0] == 'J' || card2[0] == 'J') && (card1[0] == '9' || card2[0] == '9') && card1[1] == card2[1]) {
+		preflop_card1 = 'J';
+		preflop_card2 = '9';
+		nSuited = 2;
+		return 74;
+	}
+	if ((card1[0] == 'J' || card2[0] == 'J') && (card1[0] == '8' || card2[0] == '8')) {
+		preflop_card1 = 'J';
+		preflop_card2 = '8';
+		nSuited = 1;
+		return 75;
+	}
+	if ((card1[0] == 'J' || card2[0] == 'J') && (card1[0] == '8' || card2[0] == '8') && card1[1] == card2[1]) {
+		preflop_card1 = 'J';
+		preflop_card2 = '8';
+		nSuited = 2;
+		return 76;
+	}
+	if ((card1[0] == 'J' || card2[0] == 'J') && (card1[0] == '7' || card2[0] == '7')) {
+		preflop_card1 = 'J';
+		preflop_card2 = '7';
+		nSuited = 1;
+		return 77;
+	}
+	if ((card1[0] == 'J' || card2[0] == 'J') && (card1[0] == '7' || card2[0] == '7') && card1[1] == card2[1]) {
+		preflop_card1 = 'J';
+		preflop_card2 = '7';
+		nSuited = 2;
+		return 78;
+	}
+	if ((card1[0] == 'J' || card2[0] == 'J') && (card1[0] == '6' || card2[0] == '6')) {
+		preflop_card1 = 'J';
+		preflop_card2 = '6';
+		nSuited = 1;
+		return 79;
+	}
+	if ((card1[0] == 'J' || card2[0] == 'J') && (card1[0] == '6' || card2[0] == '6') && card1[1] == card2[1]) {
+		preflop_card1 = 'J';
+		preflop_card2 = '6';
+		nSuited = 2;
+		return 80;
+	}
+	if ((card1[0] == 'J' || card2[0] == 'J') && (card1[0] == '5' || card2[0] == '5')) {
+		preflop_card1 = 'J';
+		preflop_card2 = '5';
+		nSuited = 1;
+		return 81;
+	}
+	if ((card1[0] == 'J' || card2[0] == 'J') && (card1[0] == '5' || card2[0] == '5') && card1[1] == card2[1]) {
+		preflop_card1 = 'J';
+		preflop_card2 = '5';
+		nSuited = 2;
+		return 82;
+	}
+	if ((card1[0] == 'J' || card2[0] == 'J') && (card1[0] == '4' || card2[0] == '4')) {
+		preflop_card1 = 'J';
+		preflop_card2 = '4';
+		nSuited = 1;
+		return 83;
+	}
+	if ((card1[0] == 'J' || card2[0] == 'J') && (card1[0] == '4' || card2[0] == '4') && card1[1] == card2[1]) {
+		preflop_card1 = 'J';
+		preflop_card2 = '4';
+		nSuited = 2;
+		return 84;
+	}
+	if ((card1[0] == 'J' || card2[0] == 'J') && (card1[0] == '3' || card2[0] == '3')) {
+		preflop_card1 = 'J';
+		preflop_card2 = '3';
+		nSuited = 1;
+		return 85;
+	}
+	if ((card1[0] == 'J' || card2[0] == 'J') && (card1[0] == '3' || card2[0] == '3') && card1[1] == card2[1]) {
+		preflop_card1 = 'J';
+		preflop_card2 = '3';
+		nSuited = 2;
+		return 86;
+	}
+	if ((card1[0] == 'J' || card2[0] == 'J') && (card1[0] == '2' || card2[0] == '2')) {
+		preflop_card1 = 'J';
+		preflop_card2 = '2';
+		nSuited = 1;
+		return 87;
+	}
+	if ((card1[0] == 'J' || card2[0] == 'J') && (card1[0] == '2' || card2[0] == '2') && card1[1] == card2[1]) {
+		preflop_card1 = 'J';
+		preflop_card2 = '2';
+		nSuited = 2;
+		return 88;
+	}
+	if (card1[0] == 'T' && card2[0] == 'T') {
+		preflop_card1 = 'T';
+		preflop_card2 = 'T';
+		nSuited = 1;
+		return 89;
+	}
+	if ((card1[0] == 'T' || card2[0] == 'T') && (card1[0] == '9' || card2[0] == '9')) {
+		preflop_card1 = 'T';
+		preflop_card2 = '9';
+		nSuited = 1;
+		return 90;
+	}
+	if ((card1[0] == 'T' || card2[0] == 'T') && (card1[0] == '9' || card2[0] == '9') && card1[1] == card2[1]) {
+		preflop_card1 = 'T';
+		preflop_card2 = '9';
+		nSuited = 2;
+		return 91;
+	}
+	if ((card1[0] == 'T' || card2[0] == 'T') && (card1[0] == '8' || card2[0] == '8')) {
+		preflop_card1 = 'T';
+		preflop_card2 = '8';
+		nSuited = 1;
+		return 92;
+	}
+	if ((card1[0] == 'T' || card2[0] == 'T') && (card1[0] == '8' || card2[0] == '8') && card1[1] == card2[1]) {
+		preflop_card1 = 'T';
+		preflop_card2 = '8';
+		nSuited = 2;
+		return 93;
+	}
+	if ((card1[0] == 'T' || card2[0] == 'T') && (card1[0] == '7' || card2[0] == '7')) {
+		preflop_card1 = 'T';
+		preflop_card2 = '7';
+		nSuited = 1;
+		return 94;
+	}
+	if ((card1[0] == 'T' || card2[0] == 'T') && (card1[0] == '7' || card2[0] == '7') && card1[1] == card2[1]) {
+		preflop_card1 = 'T';
+		preflop_card2 = '7';
+		nSuited = 2;
+		return 95;
+	}
+	if ((card1[0] == 'T' || card2[0] == 'T') && (card1[0] == '6' || card2[0] == '6')) {
+		preflop_card1 = 'T';
+		preflop_card2 = '6';
+		nSuited = 1;
+		return 96;
+	}
+	if ((card1[0] == 'T' || card2[0] == 'T') && (card1[0] == '6' || card2[0] == '6') && card1[1] == card2[1]) {
+		preflop_card1 = 'T';
+		preflop_card2 = '6';
+		nSuited = 2;
+		return 97;
+	}
+	if ((card1[0] == 'T' || card2[0] == 'T') && (card1[0] == '5' || card2[0] == '5')) {
+		preflop_card1 = 'T';
+		preflop_card2 = '5';
+		nSuited = 1;
+		return 98;
+	}
+	if ((card1[0] == 'T' || card2[0] == 'T') && (card1[0] == '5' || card2[0] == '5') && card1[1] == card2[1]) {
+		preflop_card1 = 'T';
+		preflop_card2 = '5';
+		nSuited = 2;
+		return 99;
+	}
+	if ((card1[0] == 'T' || card2[0] == 'T') && (card1[0] == '4' || card2[0] == '4')) {
+		preflop_card1 = 'T';
+		preflop_card2 = '4';
+		nSuited = 1;
+		return 100;
+	}
+	if ((card1[0] == 'T' || card2[0] == 'T') && (card1[0] == '4' || card2[0] == '4') && card1[1] == card2[1]) {
+		preflop_card1 = 'T';
+		preflop_card2 = '4';
+		nSuited = 2;
+		return 101;
+	}
+	if ((card1[0] == 'T' || card2[0] == 'T') && (card1[0] == '3' || card2[0] == '3')) {
+		preflop_card1 = 'T';
+		preflop_card2 = '3';
+		nSuited = 1;
+		return 102;
+	}
+	if ((card1[0] == 'T' || card2[0] == 'T') && (card1[0] == '3' || card2[0] == '3') && card1[1] == card2[1]) {
+		preflop_card1 = 'T';
+		preflop_card2 = '3';
+		nSuited = 2;
+		return 103;
+	}
+	if ((card1[0] == 'T' || card2[0] == 'T') && (card1[0] == '2' || card2[0] == '2')) {
+		preflop_card1 = 'T';
+		preflop_card2 = '2';
+		nSuited = 1;
+		return 104;
+	}
+	if ((card1[0] == 'T' || card2[0] == 'T') && (card1[0] == '2' || card2[0] == '2') && card1[1] == card2[1]) {
+		preflop_card1 = 'T';
+		preflop_card2 = '2';
+		nSuited = 2;
+		return 105;
+	}
+	if (card1[0] == '9' && card2[0] == '9') {
+		preflop_card1 = '9';
+		preflop_card2 = '9';
+		nSuited = 1;
+		return 106;
+	}
+	if ((card1[0] == '9' || card2[0] == '9') && (card1[0] == '8' || card2[0] == '8')) {
+		preflop_card1 = '9';
+		preflop_card2 = '8';
+		nSuited = 1;
+		return 107;
+	}
+	if ((card1[0] == '9' || card2[0] == '9') && (card1[0] == '8' || card2[0] == '8') && card1[1] == card2[1]) {
+		preflop_card1 = '9';
+		preflop_card2 = '8';
+		nSuited = 2;
+		return 108;
+	}
+	if ((card1[0] == '9' || card2[0] == '9') && (card1[0] == '7' || card2[0] == '7')) {
+		preflop_card1 = '9';
+		preflop_card2 = '7';
+		nSuited = 1;
+		return 109;
+	}
+	if ((card1[0] == '9' || card2[0] == '9') && (card1[0] == '7' || card2[0] == '7') && card1[1] == card2[1]) {
+		preflop_card1 = '9';
+		preflop_card2 = '7';
+		nSuited = 2;
+		return 110;
+	}
+	if ((card1[0] == '9' || card2[0] == '9') && (card1[0] == '6' || card2[0] == '6')) {
+		preflop_card1 = '9';
+		preflop_card2 = '6';
+		nSuited = 1;
+		return 111;
+	}
+	if ((card1[0] == '9' || card2[0] == '9') && (card1[0] == '6' || card2[0] == '6') && card1[1] == card2[1]) {
+		preflop_card1 = '9';
+		preflop_card2 = '6';
+		nSuited = 2;
+		return 112;
+	}
+	if ((card1[0] == '9' || card2[0] == '9') && (card1[0] == '5' || card2[0] == '5')) {
+		preflop_card1 = '9';
+		preflop_card2 = '5';
+		nSuited = 1;
+		return 113;
+	}
+	if ((card1[0] == '9' || card2[0] == '9') && (card1[0] == '5' || card2[0] == '5') && card1[1] == card2[1]) {
+		preflop_card1 = '9';
+		preflop_card2 = '5';
+		nSuited = 2;
+		return 114;
+	}
+	if ((card1[0] == '9' || card2[0] == '9') && (card1[0] == '4' || card2[0] == '4')) {
+		preflop_card1 = '9';
+		preflop_card2 = '4';
+		nSuited = 1;
+		return 115;
+	}
+	if ((card1[0] == '9' || card2[0] == '9') && (card1[0] == '4' || card2[0] == '4') && card1[1] == card2[1]) {
+		preflop_card1 = '9';
+		preflop_card2 = '4';
+		nSuited = 2;
+		return 116;
+	}
+	if ((card1[0] == '9' || card2[0] == '9') && (card1[0] == '3' || card2[0] == '3')) {
+		preflop_card1 = '9';
+		preflop_card2 = '3';
+		nSuited = 1;
+		return 117;
+	}
+	if ((card1[0] == '9' || card2[0] == '9') && (card1[0] == '3' || card2[0] == '3') && card1[1] == card2[1]) {
+		preflop_card1 = '9';
+		preflop_card2 = '3';
+		nSuited = 2;
+		return 118;
+	}
+	if ((card1[0] == '9' || card2[0] == '9') && (card1[0] == '2' || card2[0] == '2')) {
+		preflop_card1 = '9';
+		preflop_card2 = '2';
+		nSuited = 1;
+		return 119;
+	}
+	if ((card1[0] == '9' || card2[0] == '9') && (card1[0] == '2' || card2[0] == '2') && card1[1] == card2[1]) {
+		preflop_card1 = '9';
+		preflop_card2 = '2';
+		nSuited = 2;
+		return 120;
+	}
+	if (card1[0] == '8' && card2[0] == '8') {
+		preflop_card1 = '8';
+		preflop_card2 = '8';
+		nSuited = 1;
+		return 121;
+	}
+	if ((card1[0] == '8' || card2[0] == '8') && (card1[0] == '7' || card2[0] == '7')) {
+		preflop_card1 = '8';
+		preflop_card2 = '7';
+		nSuited = 1;
+		return 122;
+	}
+	if ((card1[0] == '8' || card2[0] == '8') && (card1[0] == '7' || card2[0] == '7') && card1[1] == card2[1]) {
+		preflop_card1 = '8';
+		preflop_card2 = '7';
+		nSuited = 2;
+		return 123;
+	}
+	if ((card1[0] == '8' || card2[0] == '8') && (card1[0] == '6' || card2[0] == '6')) {
+		preflop_card1 = '8';
+		preflop_card2 = '6';
+		nSuited = 1;
+		return 124;
+	}
+	if ((card1[0] == '8' || card2[0] == '8') && (card1[0] == '6' || card2[0] == '6') && card1[1] == card2[1]) {
+		preflop_card1 = '8';
+		preflop_card2 = '6';
+		nSuited = 2;
+		return 125;
+	}
+	if ((card1[0] == '8' || card2[0] == '8') && (card1[0] == '5' || card2[0] == '5')) {
+		preflop_card1 = '8';
+		preflop_card2 = '5';
+		nSuited = 1;
+		return 126;
+	}
+	if ((card1[0] == '8' || card2[0] == '8') && (card1[0] == '5' || card2[0] == '5') && card1[1] == card2[1]) {
+		preflop_card1 = '8';
+		preflop_card2 = '5';
+		nSuited = 2;
+		return 127;
+	}
+	if ((card1[0] == '8' || card2[0] == '8') && (card1[0] == '4' || card2[0] == '4')) {
+		preflop_card1 = '8';
+		preflop_card2 = '4';
+		nSuited = 1;
+		return 128;
+	}
+	if ((card1[0] == '8' || card2[0] == '8') && (card1[0] == '4' || card2[0] == '4') && card1[1] == card2[1]) {
+		preflop_card1 = '8';
+		preflop_card2 = '4';
+		nSuited = 2;
+		return 129;
+	}
+	if ((card1[0] == '8' || card2[0] == '8') && (card1[0] == '3' || card2[0] == '3')) {
+		preflop_card1 = '8';
+		preflop_card2 = '3';
+		nSuited = 1;
+		return 130;
+	}
+	if ((card1[0] == '8' || card2[0] == '8') && (card1[0] == '3' || card2[0] == '3') && card1[1] == card2[1]) {
+		preflop_card1 = '8';
+		preflop_card2 = '3';
+		nSuited = 2;
+		return 131;
+	}
+	if ((card1[0] == '8' || card2[0] == '8') && (card1[0] == '2' || card2[0] == '2')) {
+		preflop_card1 = '8';
+		preflop_card2 = '2';
+		nSuited = 1;
+		return 132;
+	}
+	if ((card1[0] == '8' || card2[0] == '8') && (card1[0] == '2' || card2[0] == '2') && card1[1] == card2[1]) {
+		preflop_card1 = '8';
+		preflop_card2 = '2';
+		nSuited = 2;
+		return 133;
+	}
+	if (card1[0] == '7' && card2[0] == '7') {
+		preflop_card1 = '7';
+		preflop_card2 = '7';
+		nSuited = 1;
+		return 134;
+	}
+	if ((card1[0] == '7' || card2[0] == '7') && (card1[0] == '6' || card2[0] == '6')) {
+		preflop_card1 = '7';
+		preflop_card2 = '6';
+		nSuited = 1;
+		return 135;
+	}
+	if ((card1[0] == '7' || card2[0] == '7') && (card1[0] == '6' || card2[0] == '6') && card1[1] == card2[1]) {
+		preflop_card1 = '7';
+		preflop_card2 = '6';
+		nSuited = 2;
+		return 136;
+	}
+	if ((card1[0] == '7' || card2[0] == '7') && (card1[0] == '5' || card2[0] == '5')) {
+		preflop_card1 = '7';
+		preflop_card2 = '5';
+		nSuited = 1;
+		return 137;
+	}
+	if ((card1[0] == '7' || card2[0] == '7') && (card1[0] == '5' || card2[0] == '5') && card1[1] == card2[1]) {
+		preflop_card1 = '7';
+		preflop_card2 = '5';
+		nSuited = 2;
+		return 138;
+	}
+	if ((card1[0] == '7' || card2[0] == '7') && (card1[0] == '4' || card2[0] == '4')) {
+		preflop_card1 = '7';
+		preflop_card2 = '4';
+		nSuited = 1;
+		return 139;
+	}
+	if ((card1[0] == '7' || card2[0] == '7') && (card1[0] == '4' || card2[0] == '4') && card1[1] == card2[1]) {
+		preflop_card1 = '7';
+		preflop_card2 = '4';
+		nSuited = 2;
+		return 140;
+	}
+	if ((card1[0] == '7' || card2[0] == '7') && (card1[0] == '3' || card2[0] == '3')) {
+		preflop_card1 = '7';
+		preflop_card2 = '3';
+		nSuited = 1;
+		return 141;
+	}
+	if ((card1[0] == '7' || card2[0] == '7') && (card1[0] == '3' || card2[0] == '3') && card1[1] == card2[1]) {
+		preflop_card1 = '7';
+		preflop_card2 = '3';
+		nSuited = 2;
+		return 142;
+	}
+	if ((card1[0] == '7' || card2[0] == '7') && (card1[0] == '2' || card2[0] == '2')) {
+		preflop_card1 = '7';
+		preflop_card2 = '2';
+		nSuited = 1;
+		return 143;
+	}
+	if ((card1[0] == '7' || card2[0] == '7') && (card1[0] == '2' || card2[0] == '2') && card1[1] == card2[1]) {
+		preflop_card1 = '7';
+		preflop_card2 = '2';
+		nSuited = 2;
+		return 144;
+	}
+	if (card1[0] == '6' && card2[0] == '6') {
+		preflop_card1 = '6';
+		preflop_card2 = '6';
+		nSuited = 1;
+		return 145;
+	}
+	if ((card1[0] == '6' || card2[0] == '6') && (card1[0] == '5' || card2[0] == '5')) {
+		preflop_card1 = '6';
+		preflop_card2 = '5';
+		nSuited = 1;
+		return 146;
+	}
+	if ((card1[0] == '6' || card2[0] == '6') && (card1[0] == '5' || card2[0] == '5') && card1[1] == card2[1]) {
+		preflop_card1 = '6';
+		preflop_card2 = '5';
+		nSuited = 2;
+		return 147;
+	}
+	if ((card1[0] == '6' || card2[0] == '6') && (card1[0] == '4' || card2[0] == '4')) {
+		preflop_card1 = '6';
+		preflop_card2 = '4';
+		nSuited = 1;
+		return 148;
+	}
+	if ((card1[0] == '6' || card2[0] == '6') && (card1[0] == '4' || card2[0] == '4') && card1[1] == card2[1]) {
+		preflop_card1 = '6';
+		preflop_card2 = '4';
+		nSuited = 2;
+		return 149;
+	}
+	if ((card1[0] == '6' || card2[0] == '6') && (card1[0] == '3' || card2[0] == '3')) {
+		preflop_card1 = '6';
+		preflop_card2 = '3';
+		nSuited = 1;
+		return 150;
+	}
+	if ((card1[0] == '6' || card2[0] == '6') && (card1[0] == '3' || card2[0] == '3') && card1[1] == card2[1]) {
+		preflop_card1 = '6';
+		preflop_card2 = '3';
+		nSuited = 2;
+		return 151;
+	}
+	if ((card1[0] == '6' || card2[0] == '6') && (card1[0] == '2' || card2[0] == '2')) {
+		preflop_card1 = '6';
+		preflop_card2 = '2';
+		nSuited = 1;
+		return 152;
+	}
+	if ((card1[0] == '6' || card2[0] == '6') && (card1[0] == '2' || card2[0] == '2') && card1[1] == card2[1]) {
+		preflop_card1 = '6';
+		preflop_card2 = '2';
+		nSuited = 2;
+		return 153;
+	}
+	if (card1[0] == '5' && card2[0] == '5') {
+		preflop_card1 = '5';
+		preflop_card2 = '5';
+		nSuited = 1;
+		return 154;
+	}
+	if ((card1[0] == '5' || card2[0] == '5') && (card1[0] == '4' || card2[0] == '4')) {
+		preflop_card1 = '5';
+		preflop_card2 = '4';
+		nSuited = 1;
+		return 155;
+	}
+	if ((card1[0] == '5' || card2[0] == '5') && (card1[0] == '4' || card2[0] == '4') && card1[1] == card2[1]) {
+		preflop_card1 = '5';
+		preflop_card2 = '4';
+		nSuited = 2;
+		return 156;
+	}
+	if ((card1[0] == '5' || card2[0] == '5') && (card1[0] == '3' || card2[0] == '3')) {
+		preflop_card1 = '5';
+		preflop_card2 = '3';
+		nSuited = 1;
+		return 157;
+	}
+	if ((card1[0] == '5' || card2[0] == '5') && (card1[0] == '3' || card2[0] == '3') && card1[1] == card2[1]) {
+		preflop_card1 = '5';
+		preflop_card2 = '3';
+		nSuited = 2;
+		return 158;
+	}
+	if ((card1[0] == '5' || card2[0] == '5') && (card1[0] == '2' || card2[0] == '2')) {
+		preflop_card1 = '5';
+		preflop_card2 = '2';
+		nSuited = 1;
+		return 159;
+	}
+	if ((card1[0] == '5' || card2[0] == '5') && (card1[0] == '2' || card2[0] == '2') && card1[1] == card2[1]) {
+		preflop_card1 = '5';
+		preflop_card2 = '2';
+		nSuited = 2;
+		return 160;
+	}
+	if (card1[0] == '4' && card2[0] == '4') {
+		preflop_card1 = '4';
+		preflop_card2 = '4';
+		nSuited = 1;
+		return 161;
+	}
+	if ((card1[0] == '4' || card2[0] == '4') && (card1[0] == '3' || card2[0] == '3')) {
+		preflop_card1 = '4';
+		preflop_card2 = '3';
+		nSuited = 1;
+		return 162;
+	}
+	if ((card1[0] == '4' || card2[0] == '4') && (card1[0] == '3' || card2[0] == '3') && card1[1] == card2[1]) {
+		preflop_card1 = '4';
+		preflop_card2 = '3';
+		nSuited = 2;
+		return 163;
+	}
+	if ((card1[0] == '4' || card2[0] == '4') && (card1[0] == '2' || card2[0] == '2')) {
+		preflop_card1 = '4';
+		preflop_card2 = '2';
+		nSuited = 1;
+		return 164;
+	}
+	if ((card1[0] == '4' || card2[0] == '4') && (card1[0] == '2' || card2[0] == '2') && card1[1] == card2[1]) {
+		preflop_card1 = '4';
+		preflop_card2 = '2';
+		nSuited = 2;
+		return 165;
+	}
+	if (card1[0] == '3' && card2[0] == '3') {
+		preflop_card1 = '3';
+		preflop_card2 = '3';
+		nSuited = 1;
+		return 166;
+	}
+	if ((card1[0] == '3' || card2[0] == '3') && (card1[0] == '2' || card2[0] == '2')) {
+		preflop_card1 = '3';
+		preflop_card2 = '2';
+		nSuited = 1;
+		return 167;
+	}
+	if ((card1[0] == '3' || card2[0] == '3') && (card1[0] == '2' || card2[0] == '2') && card1[1] == card2[1]) {
+		preflop_card1 = '3';
+		preflop_card2 = '2';
+		nSuited = 2;
+		return 168;
+	}
+	if (card1[0] == '2' && card2[0] == '2') {
+		preflop_card1 = '2';
+		preflop_card2 = '2';
+		nSuited = 1;
+		return 169;
+	}
 
+
+	return 0;
+
+};
+//tools
+
+void prwin_calcolator::GetPrwinAuto(string Cfile , string OpplFile ,string card1, string card2, string card3, string card4, string card5, string card6, string card7) {
+	int iterations = 100000;
+		
+	if (Cfile == "")Cfile ="ManualPrwinC++.txt";
+	if (OpplFile == "")OpplFile = "ManualPrwinOppl.txt";
+
+		ofstream scrivi;
+		ofstream scrivi2;
+
+		scrivi.precision(3);
+		scrivi2.precision(3);
+		cout.precision(3);
+
+		double win;
+		scrivi.open(Cfile);
+		scrivi2.open(OpplFile);
+
+		scrivi << "//min hand " << card1 << card2 << " " << card3 << card4 << card5 << " " << card6 << card7 << endl;
+		scrivi2 << "//min hand " << card1 << card2 << " " << card3 << card4 << card5 << " " << card6 << card7 << endl;
+
+		scrivi << "switch (*ActivePlayer) {\n";
+
+
+
+		for (int i = 2; i <= 9; i++) {
+			prwin_calcolator* a = new prwin_calcolator;
+			scrivi << "   case " << i << ":\n";
+			win = a->calc_prwin(card1, card2, card3, card4, card5, card6, card7, i, iterations);
+			win -= 0.01;
+			delete a;
+			//cout << card1 << card2 << " " << card3 << card4 << card5 << " " << card6 << card7 << " player = " << i << " prwin = " << win << endl << endl;
+			scrivi << "       if (prwin >= " << win << ") return true;\n       break;\n";
+			scrivi2 << "	WHEN Opponents = " << i - 1 << " AND prwin >= " << win << " RETURN true FORCE\n";
+
+
+		}
+
+		scrivi << "}\nreturn false;\n";
+		scrivi2 << "	WHEN Others RETURN false FORCE\n";
+
+		scrivi << endl;
+		scrivi2 << endl;
+		scrivi.close();
+		scrivi2.close();
+
+	
+
+
+};
+void prwin_calcolator::GetPrwin() {
+	int iterations = 100000;
+	
+	cout << "Format examples:\npreflop: AcAd\nflop: AcAdKcKdQh\nturn: AcAdKcKdQhQc\nriver: AcAdKcKdQhQcJh\n\n";
+	while (1) {
+
+		string cards = "";
+		string card1 = "";
+		string card2 = "";
+		string card3 = "";
+		string card4 = "";
+		string card5 = "";
+		string card6 = "";
+		string card7 = "";
+
+		cout << "Enter cards and push enter : \n";
+		cin >> cards;
+		cout << "\n";
+		card1 += cards[0];
+		card1 += cards[1];
+		card2 += cards[2];
+		card2 += cards[3];
+
+
+		if (cards.length() >= 10) {
+			card3 += cards[4];
+			card3 += cards[5];
+			card4 += cards[6];
+			card4 += cards[7];
+			card5 += cards[8];
+			card5 += cards[9];
+		}
+		if (cards.length() >= 12) {
+			card6 += cards[10];
+			card6 += cards[11];
+
+		}
+		if (cards.length() >= 14) {
+			card7 += cards[12];
+			card7 += cards[13];
+
+		}
+
+
+
+		ofstream scrivi;
+		ofstream scrivi2;
+		double win = 0;
+		scrivi.open("ManualPrwin.txt");
+		scrivi2.open("ManualPrwinOPPL.txt");
+
+		scrivi << "//min hand " << card1 << card2 << " " << card3 << card4 << card5 << " " << card6 << card7 << endl;
+		scrivi2 << "//min hand " << card1 << card2 << " " << card3 << card4 << card5 << " " << card6 << card7 << endl;
+
+		scrivi << "switch (*ActivePlayer) {\n";
+
+		cout.precision(3);
+		scrivi.precision(3);
+		scrivi2.precision(3);
+
+		for (int i = 2; i <= 9; i++) {
+			prwin_calcolator* a = new prwin_calcolator;
+			scrivi << "   case " << i << ":\n";
+			win = a->calc_prwin(card1, card2, card3, card4, card5, card6, card7, i, iterations);
+			win -= 0.01;
+			delete a;
+			cout << card1 << card2 << " " << card3 << card4 << card5 << " " << card6 << card7 << " player = " << i << " prwin = " << win << endl << endl;
+			scrivi << "       if (prwin >= " << win << ") return true;\n       break;\n";
+			scrivi2 << "	WHEN Opponents = " << i - 1 << " AND prwin >= " << win << " RETURN true FORCE\n";
+			win = 0;
+
+		}
+
+		scrivi << "}\nreturn false;\n";
+		scrivi2 << "	WHEN Others RETURN false FORCE\n";
+
+		scrivi << endl;
+		scrivi2 << endl;
+		scrivi.close();
+		scrivi2.close();
+
+	}
+
+
+};
+void prwin_calcolator::WriteAllPot() {
+	
+
+	//call.02 ok
+	double win = 0.00;
+	double offset = -0.01;
+	int pot = 2;
+	double incrementoprwin = .01;
+	int incrementopot = 1;
+
+	ofstream a;
+	a.open("all pot.txt");
+
+	a << "{\n";
+	for (int i = 2; i < 32; i++) {
+		a << "if (Pot <= " << pot << " ){\n";
+		a << " switch (*ActivePlayer){\n";
+		for (int j = 2; j <= 9; j++) {
+			a << "	case " << j << ":\n";
+			a << "	if (prwin >= " << (1.0 / j) + (win + offset) << ") return true;\n";
+			a << "	break;\n";
+		}
+		a << "	}\n";
+		a << "}\n";
+		win += incrementoprwin;
+		pot += incrementopot;
+	}
+
+	a << " switch (*ActivePlayer){\n";
+	for (int j = 2; j <= 9; j++) {
+		a << "	case " << j << ":\n";
+		a << "	if (prwin >= " << (1.0 / j) + (win + offset) << ") return true;\n";
+		a << "	break;\n";
+	}
+
+	a << "}\n";
+
+	a << "return false;\n";
+	a << "}\n";
+
+
+	a.close();
+	exit(0);
+
+};
+void prwin_calcolator::WriteAllStack() {
+
+
+	//call.02 ok
+	double win = 0.00;
+	double offset = 0.1;
+	int pot = 1;
+	double incrementoprwin = .001;
+	int incrementopot = 1;
+
+	double StartPrwin[10];
+
+
+
+	ofstream a;
+	a.open("all pot.txt");
+
+	a << "{\n";
+	for (int i = 0; i < 100; i++) {
+		a << "if (StackSize <= " << i << " ){\n";
+		a << " switch (*ActivePlayer){\n";
+		for (int j = 2; j <= 9; j++) {
+			a << "	case " << j << ":\n";
+			a << "	if (prwin >= " << (1.0 / j) + (win + offset) << ") return true;\n";
+			a << "	break;\n";
+		}
+		a << "	}\n";
+		a << "}\n";
+		win -= 0.001;
+		pot += incrementopot;
+	}
+
+	a.close();
+	exit(0);
+
+};
+
+void prwin_calcolator::MinPrwin() {
+	//return;
+	ofstream a;
+
+	while (1) {
+		double minprwin = 0;
+
+		cout << "enter the min prwin:\n";
+		cin >> minprwin;
+		if (minprwin == 0) minprwin = .5;
+
+		a.open("min prwin.txt");
+
+		a.precision(3);
+		cout.precision(3);
+
+		a << " switch (*ActivePlayer){\n";
+		for (int j = 2; j <= 9; j++) {
+			a << "	case " << j << ":\n";
+			a << "	if (prwin >= " << (minprwin / j) * 2 << ") return true; \n";
+			a << "	break;\n";
+			cout << "player " << j << ": ";
+			cout << (minprwin / j) * 2 << endl;
+
+		}
+		a << "	}\n";
+		a << "return false;\n";
+		cout << "\n";
+		a.close();
+	}
+
+	exit(0);
+
+};
+
+void prwin_calcolator::test() {
+	ofstream w;
+	ofstream w2;
+
+	int iteration = 1;
+	w.open("txt/WriteTxt.txt");
+	w2.open("txt/FlopNumber.txt");
+
+	int flopnumber = 0;
+	double win = 0.0;
+
+	// Genera tutte le possibili combinazioni di 5 carte, rappresentate come numeri interi da 0 a 51
+	vector<vector<int>> allCombos;
+	for (int i = 0; i < 48; i++) {
+		for (int j = i + 1; j < 49; j++) {
+			for (int k = j + 1; k < 50; k++) {
+				for (int l = k + 1; l < 51; l++) {
+					for (int m = l + 1; m < 52; m++) {
+						allCombos.push_back({ i, j, k, l, m });
+					}
+				}
+			}
+		}
+	}
+
+	// Per ogni combinazione, verifica se è una combinazione isomorfa e se lo è, elaborala
+	for (const auto& combo : allCombos) {
+		int card1 = combo[0] % 13;
+		int card2 = combo[1] % 13;
+		int card3 = combo[2] % 13;
+		int card4 = combo[3] % 13;
+		int card5 = combo[4] % 13;// Verifica se la combinazione è isomorfa
+		if (card1 >= card2 || card2 >= card3 || card3 >= card4 || card4 >= card5) {
+			continue;
+		}
+		if (combo[0] / 13 == combo[1] / 13 || combo[0] / 13 == combo[2] / 13 || combo[0] / 13 == combo[3] / 13 || combo[0] / 13 == combo[4] / 13 ||
+			combo[1] / 13 == combo[2] / 13 || combo[1] / 13 == combo[3] / 13 || combo[1] / 13 == combo[4] / 13 ||
+			combo[2] / 13 == combo[3] / 13 || combo[2] / 13 == combo[4] / 13 ||
+			combo[3] / 13 == combo[4] / 13) {
+			continue;
+		}
+
+		// Elabora la combinazione isomorfa
+		for (int suit = 2; suit <= 5; suit++) {
+			if (suit == 2) {
+				w << "switch (nSuits){\n";
+				w << "case " << suit << "://" << Rank[card1] << "h" << Rank[card2] << "h" << Rank[card3] << "s" << Rank[card4] << "c" << Rank[card5] << "d\n";
+				w << "    switch (nPlayers){\n";
+				for (int player = 2; player <= 9; player++) {
+					w << "        case " << player << ":\n";
+					win = calc_prwin(Rank[card1] + "h", Rank[card2] + "h", Rank[card3] + "s", Rank[card4] + "c", Rank[card5] + "d", "", "", player, iteration);
+					w << "        return " << win << ";\n";
+				}
+
+				w << " }\n}\n";
+			}
+			else if (suit == 3) {
+				w << "switch (nSuits){\n";
+				w << "case " << suit << "://" << Rank[card1] << "h" << Rank[card2] << "h" << Rank[card3] << "h" << Rank[card4] << "s" << Rank[card5] << "d\n";
+				w << "    switch (nPlayers){\n";
+				for (int player = 2; player <= 9; player++) {
+					w << "        case " << player << ":\n";
+					win = calc_prwin(Rank[card1] + "h", Rank[card2] + "h", Rank[card3] + "h", Rank[card4] + "s", Rank[card5] + "d", "", "", player, iteration);
+					w << "        return " << win << ";\n";
+				}
+
+				w << "    }\n}\n";
+			}
+			else if (suit == 4) {
+				w << "switch (nSuits){\n";
+				w << "case " << suit << "://" << Rank[card1] << "h" << Rank[card2] << "h" << Rank[card3] << "h" << Rank[card4] << "h" << Rank[card5] << "d\n";
+				w << "    switch (nPlayers){\n";
+				for (int player = 2; player <= 9; player++) {
+					w << "        case " << player << ":\n";
+					win = calc_prwin(Rank[card1] + "h", Rank[card2] + "h", Rank[card3] + "h", Rank[card4] + "h", Rank[card5] + "d", "", "", player, iteration);
+					w << "        return " << win << ";\n";
+				}
+
+				w << "    }\n}\n";
+			}
+			else {
+				w << "switch (nSuits){\n";
+				w << "case " << suit << "://" << Rank[card1] << "h" << Rank[card2] << "h" << Rank[card3] << "h" << Rank[card4] << "h" << Rank[card5] << "h\n";
+				w << "    switch (nPlayers){\n";
+				for (int player = 2; player <= 9; player++) {
+					w << "        case " << player << ":\n";
+					win = calc_prwin(Rank[card1] + "h", Rank[card2] + "h", Rank[card3] + "h", Rank[card4] + "h", Rank[card5] + "h", "", "", player, iteration);
+					w << "        return " << win << ";\n";
+				}
+
+				w << "    }\n}\n";
+			}
+
+			flopnumber++;
+			w2 << flopnumber << "\n";
+		}
+	}
+
+	w.close();
+	w2.close();
+}
+
+
+
+void prwin_calcolator::WritePrwinALL() {
+	return;
+
+#define MACRO()	{\
+	scrivi << "if (ToCall <= " << ToCall << "){\n";\
+	scrivi2 << "WHEN AmountToCall <= " << ToCall << endl;\
+	scrivi << "//Min hand "<<cards[0]<< cards[1]<< cards[2]<< cards[3]<< cards[4]<< cards[5]<< cards[6]<<endl;\
+	scrivi2 << "//Min hand "<<cards[0]<< cards[1]<< cards[2]<< cards[3]<< cards[4]<< cards[5]<< cards[6]<<endl;\
+	scrivi << " switch(*ActivePlayer){\n";\
+	for (int i = 2; i <= 9; i++) {\
+		prwin_calcolator* a = new prwin_calcolator;\
+		scrivi << "   case " << i << ":\n";\
+		win = a->calc_prwin(cards[0], cards[1], cards[2], cards[3], cards[4], cards[5], cards[6], i, 100000);\
+		delete a;\
+		scrivi << "       if (prwin >= " << win << ") return true;\n       break;\n";\
+		scrivi2 << "	WHEN Opponents = " << i - 1 << " AND prwin >= " << win << " RETURN true FORCE\n";\
+		}\
+		scrivi2 <<"	WHEN Others RETURN false FORCE\n\N";\
+		scrivi << "\n}\nreturn false;\n};\n";\
+	}
+
+	ofstream scrivi("txt/c++.txt");
+	ofstream scrivi2("txt/oppl.txt");
+
+	cout.precision(2);
+	scrivi.precision(2);
+	scrivi2.precision(2);
+
+	int ToCall = 0;
+	double win = 0;
+	string cards[7] = { "","","","","","","" };
+
+	cout << "scrivo txt con prwin..\n";
+
+
+	ToCall = 1;
+	cards[0] = "Ac";
+	cards[1] = "2c";
+	cards[2] = "8h";
+	cards[3] = "9d";
+	cards[4] = "6c";
+	cards[5] = "";
+	cards[5] = "";
+	MACRO();
+
+
+	ToCall = 3;
+	cards[0] = "Ac";
+	cards[1] = "5c";
+	cards[2] = "8h";
+	cards[3] = "9d";
+	cards[4] = "6c";
+	cards[5] = "";
+	cards[5] = "";
+	MACRO();
+
+	cout << "..\n";
+
+	ToCall = 5;
+	cards[0] = "Ac";
+	cards[1] = "2c";
+	cards[2] = "6h";
+	cards[3] = "9d";
+	cards[4] = "6c";
+	cards[5] = "";
+	cards[5] = "";
+	MACRO();
+
+	cout << "..\n";
+	ToCall = 10;
+	cards[0] = "Ac";
+	cards[1] = "8c";
+	cards[2] = "8h";
+	cards[3] = "9d";
+	cards[4] = "6c";
+	cards[5] = "";
+	cards[5] = "";
+	MACRO();
+
+	cout << "..\n";
+	ToCall = 15;
+	cards[0] = "Ac";
+	cards[1] = "Tc";
+	cards[2] = "8h";
+	cards[3] = "9d";
+	cards[4] = "6c";
+	cards[5] = "";
+	cards[5] = "";
+	MACRO();
+
+	cout << "..\n";
+	ToCall = 20;
+	cards[0] = "Ac";
+	cards[1] = "Jc";
+	cards[2] = "8h";
+	cards[3] = "Td";
+	cards[4] = "6c";
+	cards[5] = "";
+	cards[5] = "";
+	MACRO();
+
+	cout << "..\n";
+	ToCall = 25;
+	cards[0] = "Ac";
+	cards[1] = "Qc";
+	cards[2] = "8h";
+	cards[3] = "9d";
+	cards[4] = "Jc";
+	cards[5] = "";
+	cards[5] = "";
+	MACRO();
+
+	cout << "..\n";
+	ToCall = 30;
+	cards[0] = "Ac";
+	cards[1] = "Kc";
+	cards[2] = "8h";
+	cards[3] = "9d";
+	cards[4] = "Jc";
+	cards[5] = "";
+	cards[5] = "";
+	MACRO();
+
+	cout << "..\n";
+	ToCall = 2000;
+	cards[0] = "Ac";
+	cards[1] = "Kc";
+	cards[2] = "Th";
+	cards[3] = "9d";
+	cards[4] = "Qc";
+	cards[5] = "";
+	cards[5] = "";
+	MACRO();
+
+	/*
+	for (int i = 2; i <= 9; i++) {
+		prwin_calcolator* a = new prwin_calcolator;
+		scrivi << "   case " << i << ":\n";
+		win = a->calc_prwin(cards[0], cards[1], cards[2], cards[3], cards[4], cards[5], cards[6], i, 100000);
+		delete a;
+		scrivi << "       if (prwin >= " << win << ") return true;\n       break;\n";
+		scrivi2 << "	WHEN Opponents = " << i - 1 << " AND prwin >= " << win << " RETURN true FORCE\n";
+
+
+	}
+
+
+	scrivi << " }\n";
+	scrivi << "}\n";
+	*/
+
+
+	scrivi.close();
+	scrivi2.close();
+
+
+	exit(0);
+
+
+
+
+};
+void prwin_calcolator::WriteTxt() {
+	ofstream w;
+	ofstream w2;
+
+	int iteration = 0;
+	w.open("txt/WriteTxt.txt");
+	w2.open("txt/FlopNumber.txt");
+
+	int flopnumber = 0;
+	double win = 0.0;
+	for (int card1 = 0; card1 < 13; card1++) {
+		for (int card2 = 0; card2 < 13; card2++) {
+			for (int card3 = 0; card3 < 13; card3++) {
+				for (int card4 = 0; card4 < 13; card4++) {
+					for (int card5 = 0; card5 < 13; card5++) {
+						if (card1 > card2 || card2 > card3 || card3 > card4 || card4 > card5)continue;							
+						for (int suit = 2; suit <= 5; suit++) {
+							if (suit == 2) {
+								if (card1 == card2)continue;
+
+								w << "switch (nSuits){\n";
+								w << "case " << suit << "://" << Rank[card1] << "h" <<Rank[card2] << "h" <<Rank[card3] << "s"<< Rank[card4] << "c" <<Rank[card5] << "d\n";
+								w << "	switch (nPlayers){\n";
+								for (int player = 2; player <= 9; player++) {
+									w << "		case " << player << ":\n";
+									win = calc_prwin(Rank[card1] + "h", Rank[card2] + "h", Rank[card3] + "s", Rank[card4] + "c", Rank[card5] + "d", "", "", player, iteration);
+									w << "		return " << win<<";\n";									
+								}
+							
+								w << "	}\n";
+								flopnumber++;
+							}
+							else if (suit == 3) {
+								if (card1 == card2 || card1 == card3 || card1 == card4 || card1 == card5)continue;
+								if (card2 == card3)continue;
+
+								w << "switch (nSuits){\n";
+								w << "case " << suit << "://" << Rank[card1] << "h" << Rank[card2] << "h" << Rank[card3] << "h" << Rank[card4] << "c" << Rank[card5] << "d\n";
+								w << "	switch (nPlayers){\n";
+								for (int player = 2; player <= 9; player++) {
+									w << "		case " << player << ":\n";
+									win = calc_prwin(Rank[card1] + "h", Rank[card2] + "h", Rank[card3] + "h", Rank[card4] + "c", Rank[card5] + "d", "", "", player, iteration);
+									w << "		return " << win << ";\n";
+								}
+
+								w << "	}\n";
+								flopnumber++;
+							}
+							else if (suit == 4) {
+								if (card1 == card2 || card1 == card3 || card1 == card4 || card1 == card5)continue;
+								if (card2 == card3 || card2 == card4 || card2 == card5)continue;
+								if (card3 == card4)continue;
+
+								w << "switch (nSuits){\n";
+								w << "case " << suit << "://" << Rank[card1] << "h" << Rank[card2] << "h" << Rank[card3] << "h" << Rank[card4] << "h" << Rank[card5] << "d\n";
+								w << "	switch (nPlayers){\n";
+								for (int player = 2; player <= 9; player++) {
+									w << "		case " << player << ":\n";
+									win = calc_prwin(Rank[card1] + "h", Rank[card2] + "h", Rank[card3] + "h", Rank[card4] + "h", Rank[card5] + "d", "", "", player, iteration);
+									w << "		return " << win << ";\n";
+								}
+
+								w << "	}\n";
+								flopnumber++;
+							}
+							else if (suit == 5) {
+								if (card1 == card2 || card1 == card3 || card1 == card4 || card1 == card5 )continue;
+								if (card2 == card3 || card2 == card4 || card2 == card5)continue;
+								if (card3 == card4 || card3 == card5 )continue;
+								if (card4 == card5)continue;
+
+
+
+								
+								w << "switch (nSuits){\n";
+								w << "case " << suit << "://" << Rank[card1] << "h" << Rank[card2] << "h" << Rank[card3] << "h" << Rank[card4] << "h" << Rank[card5] << "h\n";
+								w << "	switch (nPlayers){\n";
+								for (int player = 2; player <= 9; player++) {
+									w << "		case " << player << ":\n";
+									win = calc_prwin(Rank[card1] + "h", Rank[card2] + "h", Rank[card3] + "h", Rank[card4] + "h", Rank[card5] + "h", "", "", player, iteration);
+									w << "		return " << win << ";\n";
+								}
+
+								w << "	}\n";
+								flopnumber++;
+							};
+							
+
+							//w2<<"if (n"<<card1<<
+
+							w << "}\n";
+							//cout << flopnumber << endl;
+							flopnumber++;
+						}
+
+						w.flush();
+					
+					}
+				}
+			}
+		}
+	}
+	cout << flopnumber;
+	w.close();
+	w2.close();
+	exit(0);
+
+}
+void prwin_calcolator::findPrwin() {
+#define resetcard card1 = "";card2 = "";card3 = "";card4 = "";card5 = "";card6 = "";card7 = "";
+	string card1 = "";
+	string card2 = "";
+	string card3 = "";
+	string card4 = "";
+	string card5 = "";
+	string card6 = "";
+	string card7 = "";
+	double prwin = 0;
+
+	string cards[100] ={""};
+	bool fatto[100] = { false };
+
+	double targetprwin = .5;
+
+
+	int betround = 4;
+	int index = 0;
+	bool foundcard = true;
+
+	string cfile = "FindPrwinC++.txt";
+	string opplfile = "FindOppl.txt";
+
+	cout.precision(3);	
+
+
+	while (1) {
+		if (foundcard) {
+			bet:
+			cout << "Enter betround:\n";
+			cin >> betround;
+
+			if (betround <=0 || betround > 4) {
+				cout << "ERROR!\n";
+				goto bet;
+			}
+
+			target:
+			cout << "Enter target prwin:\n";
+			cin >> targetprwin;
+
+			if (targetprwin <=0 || targetprwin >= 1) {
+				cout << "ERROR!\n";
+				goto target;
+			}
+
+			foundcard = false;
+			cout << "searching cards..\n\n";
+		}
+
+
+		switch (betround) {
+			case 1:
+				card1 = NewDeck[rand() % 52];
+				card2 = NewDeck[rand() % 52];
+				if (card1 == card2)continue;
+
+				break;
+			case 2:
+				card1 = NewDeck[rand() % 52];
+				card2 = NewDeck[rand() % 52];
+				card3 = NewDeck[rand() % 52];
+				card4 = NewDeck[rand() % 52];
+				card5 = NewDeck[rand() % 52];
+				if (card1 == card2 || card1 == card3 || card1 == card4 || card1 == card5)continue;
+				if (card2 == card3 || card2 == card4 || card2 == card5)continue;
+				if (card3 == card4 || card3 == card5)continue;
+				if (card4 == card5)continue;
+				break;
+
+
+			case 3:
+				card1 = NewDeck[rand() % 52];
+				card2 = NewDeck[rand() % 52];
+				card3 = NewDeck[rand() % 52];
+				card4 = NewDeck[rand() % 52];
+				card5 = NewDeck[rand() % 52];
+				card6 = NewDeck[rand() % 52];
+				if (card1 == card2 || card1 == card3 || card1 == card4 || card1 == card5 || card1 == card6 )continue;
+				if (card2 == card3 || card2 == card4 || card2 == card5 || card2 == card6)continue;
+				if (card3 == card4 || card3 == card5 || card3 == card6)continue;
+				if (card4 == card5 || card4 == card6)continue;
+				if (card5 == card6 )continue;
+				break;
+			case 4:
+				card1 = NewDeck[rand() % 52];
+				card2 = NewDeck[rand() % 52];
+				card3 = NewDeck[rand() % 52];
+				card4 = NewDeck[rand() % 52];
+				card5 = NewDeck[rand() % 52];
+				card6 = NewDeck[rand() % 52];
+				card7 = NewDeck[rand() % 52];
+				if (card1 == card2 || card1 == card3 || card1 == card4 || card1 == card5 || card1 == card6 || card1 == card7)continue;
+				if (card2 == card3 || card2 == card4 || card2 == card5 || card2 == card6 || card2 == card7)continue;
+				if (card3 == card4 || card3 == card5 || card3 == card6 || card3 == card7)continue;
+				if (card4 == card5 || card4 == card6 || card4 == card7)continue;
+				if (card5 == card6 || card5 == card7)continue;
+				if (card6 == card7)continue;
+				break;
+			}		
+		prwin = calc_prwin(card1, card2, card3, card4, card5, card6, card7, 2, 10000);
+					
+	
+		if (prwin > targetprwin) {
+			switch (betround) {
+			case 1:
+				if (prwin >= targetprwin && prwin < targetprwin + 0.01) {
+					GetPrwinAuto(cfile,opplfile,card1, card2, "", "", "", "", "");
+					foundcard = true;
+					targetprwin = 0;
+					betround = 0;
+					resetcard
+				}
+				break;
+			case 2:
+
+				if (prwin >= targetprwin && prwin < targetprwin + 0.01) {
+					GetPrwinAuto(cfile, opplfile, card1, card2, card3, card4, card5, "", "");
+					foundcard = true;
+					targetprwin = 0;
+					betround = 0;
+					resetcard
+				}
+				break;
+			case 3:
+				if (prwin >= targetprwin && prwin < targetprwin + 0.01) {
+					GetPrwinAuto(cfile, opplfile, card1, card2, card3, card4, card5, card6, "");
+					foundcard = true;
+					targetprwin = 0;
+					betround = 0;
+					resetcard
+				}
+
+				break;
+			case 4:
+				if (prwin >= targetprwin && prwin < targetprwin + 0.01) {
+					GetPrwinAuto(cfile, opplfile ,card1, card2, card3, card4, card5, card6, card7);
+					foundcard = true;
+					targetprwin = 0;
+					betround = 0;
+					resetcard
+				}
+				break;
+			}
+		}	
+
+
+		index++;
+
+	}
+
+};
+
+void prwin_calcolator::getALLprwin() {
+	return;
+	string wins[10] = {""};
+	string Cline = "";
+	string Oline = "";
+	string Cline2 = "";
+	string Oline2 = "";
+	ofstream Cfile;
+	ofstream Ofile;
+
+	int targetpot = 50;
+	//clear old txt
+	int pot = 5;
+	int betround = 2;
+
+	float targetprwin = 0.00;
+	int win = 80;
+	string round = "";
+
+	for (int bet = 1; bet <= 1; bet++) {
+		betround = bet;
+		if (betround == 1)round = " preflop ";
+		if (betround == 2)round = " flop ";
+		if (betround == 3)round = " turn ";
+		if (betround == 4)round = " river ";
+
+		if (betround == 1)targetprwin = 0.65;
+		if (betround == 2)targetprwin = 0.60;
+		if (betround == 3)targetprwin = 0.55;
+		if (betround == 4)targetprwin = 0.60;
+
+		Cline += "{\n";
+		Cline2 += "{\n";
+		while (int(targetprwin*100) <= win) {
+			if (int(targetprwin * 100) < win) {
+				Cline += "if (Pot <= " + to_string(pot) + "){\n";
+				Oline += "WHEN PotSize <= " + to_string(pot) + "\n";
+				Cline2 += "if (ToCall <= " + to_string(pot) + "){\n";
+				Oline2 += "WHEN AmountToCall <= " + to_string(pot) + "\n";
+			}
+			else {
+				Cline += "if (Pot >= " + to_string(pot) + "){\n";
+				Oline += "WHEN PotSize >= " + to_string(pot) + "\n";
+				Cline2 += "if (ToCall >= " + to_string(pot) + "){\n";
+				Oline2 += "WHEN AmountToCall >= " + to_string(pot) + "\n";
+			};
+
+
+			{
+				//ottieni singole prwin per giocatori nell'array
+				findPrwinAUTO_wins(wins, betround, targetprwin);
+				Cline2 += "linea = __LINE__;\n";
+				Cline2 += "switch (*ActivePlayer) {\n";
+
+				Cline += "linea = __LINE__;\n";
+				Cline += "switch (*ActivePlayer) {\n";
+
+				//scrivi su txt per c++ e oppl
+				for (int i = 2; i <= 9; i++) {
+					Cline2 += "	case " + to_string(i) + ":\n";
+					Cline2 += "	if (prwin >= " + wins[i] + ") return true;\n	break;\n";
+					Oline2 += "WHEN Opponents = " + to_string(i-1) + " AND prwin >= " + wins[i] + " RETURN true FORCE\n";
+
+					Cline += "	case " + to_string(i) + ":\n";
+					Cline += "	if (prwin >= " + wins[i] + ") return true;\n	break;\n";
+					Oline += "WHEN Opponents = " + to_string(i-1) + " AND prwin >= " + wins[i] + " RETURN true FORCE\n";
+					wins[i] = "";
+				}
+				Cline += "}\nreturn false;\n}\n";
+				Oline += "WHEN Others RETURN false FORCE\n\n";
+
+				Cline2 += "}\nreturn false;\n}\n";
+				Oline2 += "WHEN Others RETURN false FORCE\n\n";
+
+			}
+			pot += 1;
+			targetprwin += 0.01;
+			cout << "Rimanenti.. " << targetpot - pot << endl;
+		}
+		Cline += "}\n";
+		Cline2 += "}\n";
+		
+		
+		Cfile.open("txt/autopot/raise " + round + " c++.txt");
+		Ofile.open("txt/autopot/raise " + round + " oppl.txt");
+		Cfile << Cline;
+		Ofile << Oline;
+		Cline = "";
+		Oline = "";
+		Cfile.close();
+		Ofile.close();
+
+		Cfile.open("txt/autopot/call " + round + " c++.txt");
+		Ofile.open("txt/autopot/call " + round + " oppl.txt");
+		Cfile << Cline2;
+		Ofile << Oline2;
+		Cline2 = "";
+		Oline2 = "";
+
+		Cfile.close();
+		Ofile.close();
+
+		/*
+		//call
+		pot = 2;
+		if (betround == 1)targetprwin = .33;
+		if (betround > 1)targetprwin = .45;
+		while (pot <= 50) {
+			Cline += "if (ToCall <= " + to_string(pot) + "){\n";
+			Oline += "WHEN AmountToCall <= " + to_string(pot) + "\n";
+			{
+				//ottieni singole prwin per giocatori nell'array
+				findPrwinAUTO_wins(wins, betround, targetprwin);
+				Cline += "linea = __LINE__;\n";
+				Cline += "switch (*ActivePlayer) {\n";
+				//scrivi su txt per c++ e oppl
+				for (int i = 2; i <= 9; i++) {
+					Cline += "	case " + to_string(i) + ":\n";
+					Cline += "	if (prwin >= " + wins[i] + ") return true;\n	break;\n";
+					Oline += "WHEN Opponents = " + to_string(i) + " AND prwin >= " + wins[i] + " RETURN true FORCE;\n";
+					wins[i] = "";
+				}
+				Cline += "}\nreturn false;\n}\n\n";
+				Oline += "WHEN Others RETURN false FORCE\n\n";
+			}
+			pot += 1;
+			targetprwin += 0.01;
+			cout << "Rimanenti.." << 50 - pot << endl;
+		}
+		Cfile.open("txt/autopot/call " + round + " c++.txt");
+		Ofile.open("txt/autopot/call " + round + " oppl.txt");
+		Cfile << Cline;
+		Ofile << Oline;
+		Cline = "";
+		Oline = "";
+		Cfile.close();
+		Ofile.close();	
+	*/
+	}
+
+	exit(0);
+};
+void prwin_calcolator::findPrwinAUTO_wins(string wins[],int betround , double targetprwin) {
+	string card1 = "";
+	string card2 = "";
+	string card3 = "";
+	string card4 = "";
+	string card5 = "";
+	string card6 = "";
+	string card7 = "";
+
+	string output = "";
+
+	double prwin = 0;
+
+	string cards[100] = { "" };
+	bool fatto[100] = { false };
+	int times = 0;
+	int index = 0;
+	bool foundcard = false;
+	double offset = 0.01;
+	cout.precision(3);
+
+	cout << "target prwin: " << targetprwin << " betround: " << betround << "\nwait...\n";
+	while (!foundcard) {
+		times++;
+
+		switch (betround) {
+		case 1:
+			card1 = NewDeck[rand() % 52];
+			card2 = NewDeck[rand() % 52];
+			if (card1 == card2)continue;
+
+			break;
+		case 2:
+			card1 = NewDeck[rand() % 52];
+			card2 = NewDeck[rand() % 52];
+			card3 = NewDeck[rand() % 52];
+			card4 = NewDeck[rand() % 52];
+			card5 = NewDeck[rand() % 52];
+			if (card1 == card2 || card1 == card3 || card1 == card4 || card1 == card5)continue;
+			if (card2 == card3 || card2 == card4 || card2 == card5)continue;
+			if (card3 == card4 || card3 == card5)continue;
+			if (card4 == card5)continue;
+			break;
+
+
+		case 3:
+			card1 = NewDeck[rand() % 52];
+			card2 = NewDeck[rand() % 52];
+			card3 = NewDeck[rand() % 52];
+			card4 = NewDeck[rand() % 52];
+			card5 = NewDeck[rand() % 52];
+			card6 = NewDeck[rand() % 52];
+			if (card1 == card2 || card1 == card3 || card1 == card4 || card1 == card5 || card1 == card6)continue;
+			if (card2 == card3 || card2 == card4 || card2 == card5 || card2 == card6)continue;
+			if (card3 == card4 || card3 == card5 || card3 == card6)continue;
+			if (card4 == card5 || card4 == card6)continue;
+			if (card5 == card6)continue;
+			break;
+		case 4:
+			card1 = NewDeck[rand() % 52];
+			card2 = NewDeck[rand() % 52];
+			card3 = NewDeck[rand() % 52];
+			card4 = NewDeck[rand() % 52];
+			card5 = NewDeck[rand() % 52];
+			card6 = NewDeck[rand() % 52];
+			card7 = NewDeck[rand() % 52];
+			if (card1 == card2 || card1 == card3 || card1 == card4 || card1 == card5 || card1 == card6 || card1 == card7)continue;
+			if (card2 == card3 || card2 == card4 || card2 == card5 || card2 == card6 || card2 == card7)continue;
+			if (card3 == card4 || card3 == card5 || card3 == card6 || card3 == card7)continue;
+			if (card4 == card5 || card4 == card6 || card4 == card7)continue;
+			if (card5 == card6 || card5 == card7)continue;
+			if (card6 == card7)continue;
+			break;
+		}
+		prwin = calc_prwin(card1, card2, card3, card4, card5, card6, card7, 2, 10000);
+		
+		//avoid infinite loop
+		if (times >= 1000) {
+			offset += 0.01;
+			times = 0;
+		}
+
+		if (prwin > targetprwin) {
+			switch (betround) {
+			case 1:
+				if (prwin >= targetprwin && prwin < targetprwin + offset) {
+					GetPrwinAuto_wins(wins, card1, card2, "", "", "", "", "");
+					foundcard = true;
+				}
+				break;
+			case 2:
+
+				if (prwin >= targetprwin && prwin < targetprwin + offset) {
+					GetPrwinAuto_wins(wins, card1, card2, card3, card4, card5, "", "");
+					foundcard = true;
+				}
+				break;
+			case 3:
+				if (prwin >= targetprwin && prwin < targetprwin + offset) {
+					GetPrwinAuto_wins(wins, card1, card2, card3, card4, card5, card6, "");
+					foundcard = true;
+				}
+
+				break;
+			case 4:
+				if (prwin >= targetprwin && prwin < targetprwin + offset) {
+					GetPrwinAuto_wins(wins, card1, card2, card3, card4, card5, card6, card7);
+					foundcard = true;
+				}
+				break;
+			}
+		}
+
+
+		index++;
+
+	}
+	cout << "Done\n";
+
+};
+void prwin_calcolator::GetPrwinAuto_wins(string wins[], string card1, string card2, string card3, string card4, string card5, string card6, string card7) {
+	int iterations = 10000;
+
+	cout.precision(3);
+	double offset = 0.01;
+	for (int i = 2; i <= 9; i++) {
+		prwin_calcolator* a = new prwin_calcolator;
+		wins[i] = to_string(a->calc_prwin(card1, card2, card3, card4, card5, card6, card7, i, iterations)-offset);
+		delete a;
+
+
+	}
+
+
+
+
+};
+
+//temp
+void prwin_calcolator::getALLprwinMANUAL() {
+	return;
+	string wins[10] = { "" };
+	string Cline = "";
+	string Oline = "";
+	string Cline2 = "";
+	string Oline2 = "";
+	ofstream Cfile;
+	ofstream Ofile;
+
+	int targetpot = 50;
+	//clear old txt
+	int pot = 2;
+	int betround = 2;
+
+	int minprwin = 0;
+	int win = 80;
+	string round = "";
+	int tempprwin = -1;
+	int type = -1;
+	int maxprwin = 0;
+	int _minprwin = 0;
+
+	cout << "After entering MIN and MAX prwin\n"
+		"this program choose cards and writes txt with c ++ and oppl code to paste..\n"
+		"(for each BB in the pot or to call , 1 point of prwin is added.)\n";
+	while (1) {
+ChooseBetround: {
+		cout << "\nEnter betround:\n";
+		cin >> betround;
+		if (betround < 1 || betround > 4) {
+			cout << "invalid bet round, retry.";
+			goto ChooseBetround;
+		}
+		if (betround == 1) {
+			round = "...preflop ";
+			cout << round << endl;
+		}
+		if (betround == 2) {
+			round = "...flop ";
+			cout << round << endl;
+
+		}
+		if (betround == 3) {
+			round = "...turn ";
+			cout << round << endl;
+
+		}
+		if (betround == 4) {
+			round = "...river ";
+			cout << round << endl;
+
+		}
+		}
+
+ChooseMinPrwin: {
+	cout << "\nChoose MIN prwin:\n";
+	cin >> tempprwin;
+	if (tempprwin <= 0 || tempprwin >= 100) {
+		cout << "\nError. retry es 50.\n";
+		goto ChooseMinPrwin;
+	}
+	minprwin = tempprwin;
+	_minprwin = tempprwin;
+	tempprwin = 0;
+	}
+
+ChooseMaxPrwin: {
+cout << "\nChoose MAX prwin\n";
+cin >> tempprwin;
+if (tempprwin <= 0 || tempprwin >= 100) {
+	cout << "\nError. retry es 50.\n";
+	goto ChooseMaxPrwin;
+}
+win = tempprwin;
+maxprwin = tempprwin;
+tempprwin = 0;
+
+}
+
+cout << "\nStarting..\n";
+
+pot = 2;
+Cline += "{\n// "+to_string(_minprwin)+" "+ to_string(maxprwin)+" \n";
+Cline2 += "\n{// " + to_string(_minprwin) + " " + to_string(maxprwin) + "\n";
+
+while (minprwin <= win) {
+	cout << "\nRimanenti.. " << win - minprwin << endl;
+
+	if (minprwin < win) {
+		Cline += "if (Pot <= " + to_string(pot) + "){\n";
+		Oline += "WHEN PotSize <= " + to_string(pot) + "\n";
+		Cline2 += "if (ToCall <= " + to_string(pot) + "){\n";
+		Oline2 += "WHEN AmountToCall <= " + to_string(pot) + "\n";
+	}
+	else {
+		Cline += "if (Pot >= " + to_string(pot) + "){\n";
+		Oline += "WHEN PotSize >= " + to_string(pot) + "\n";
+		Cline2 += "if (ToCall >= " + to_string(pot) + "){\n";
+		Oline2 += "WHEN AmountToCall >= " + to_string(pot) + "\n";
+	};
+
+	{
+		double target = (double(minprwin) / 100);
+
+		//ottieni singole prwin per giocatori nell'array
+		findPrwinAUTO_wins(wins, betround, target);
+		Cline2 += "linea = __LINE__;\n";
+		Cline2 += "switch (*ActivePlayer) {\n";
+
+		Cline += "linea = __LINE__;\n";
+		Cline += "switch (*ActivePlayer) {\n";
+
+
+		//scrivi su txt per c++ e oppl
+		for (int i = 2; i <= 9; i++) {
+			Cline2 += "	case " + to_string(i) + ":\n";
+			Cline2 += "	if (prwin >= " + wins[i] + ") return true;\n	break;\n";
+			Oline2 += "WHEN Opponents = " + to_string(i - 1) + " AND prwin >= " + wins[i] + " RETURN true FORCE\n";
+
+			Cline += "	case " + to_string(i) + ":\n";
+			Cline += "	if (prwin >= " + wins[i] + ") return true;\n	break;\n";
+			Oline += "WHEN Opponents = " + to_string(i - 1) + " AND prwin >= " + wins[i] + " RETURN true FORCE\n";
+			wins[i] = "";
+		}
+		Cline += "}\nreturn false;\n}\n";
+		Oline += "WHEN Others RETURN false FORCE\n\n";
+
+		Cline2 += "}\nreturn false;\n}\n";
+		Oline2 += "WHEN Others RETURN false FORCE\n\n";
+
+	}
+	pot += 1;
+	minprwin += 1;
+}
+Cline += "}\n";
+Cline2 += "}\n";
+
+
+
+
+Cfile.open("autopot/" + round + "_Raise_" + to_string(_minprwin) + "_" + to_string(maxprwin) + "_C++.txt");
+Ofile.open("autopot/" + round + "_Raise_" + to_string(_minprwin) + "_" + to_string(maxprwin) + "_OPPL.txt");
+Cfile << Cline;
+Ofile << Oline;
+Cline = "";
+Oline = "";
+cout << "\n" + to_string(_minprwin) + " " + to_string(maxprwin) + " completed.\n";
+Cfile.close();
+Ofile.close();
+
+
+Cfile.open("autopot/" + round + "_Call_" + to_string(_minprwin) + "_" + to_string(maxprwin) + "_C++.txt");
+Ofile.open("autopot/" + round + "_Call_" + to_string(_minprwin) + "_" + to_string(maxprwin) + "_OPPL.txt");
+
+Cfile << Cline2;
+Ofile << Oline2;
+Cline2 = "";
+Oline2 = "";
+
+
+Cfile.close();
+Ofile.close();
+
+	}
+
+	exit(0);
+};
+
+
+
+void prwin_calcolator::GetPrwinINVERSO() {
+	int iterations = 100000;
+
+	cout << "Format examples:\npreflop: AcAd\nflop: AcAdKcKdQh\nturn: AcAdKcKdQhQc\nriver: AcAdKcKdQhQcJh\n\n";
+
+	while (1) {
+
+		string cards = "";
+		string card1 = "";
+		string card2 = "";
+		string card3 = "";
+		string card4 = "";
+		string card5 = "";
+		string card6 = "";
+		string card7 = "";
+		cout << "(INVERSO)\n";
+		cout << "Enter cards and push enter : \n";
+		cin >> cards;
+		cout << "\n";
+		card1 += cards[0];
+		card1 += cards[1];
+		card2 += cards[2];
+		card2 += cards[3];
+
+
+		if (cards.length() >= 10) {
+			card3 += cards[4];
+			card3 += cards[5];
+			card4 += cards[6];
+			card4 += cards[7];
+			card5 += cards[8];
+			card5 += cards[9];
+		}
+		if (cards.length() >= 12) {
+			card6 += cards[10];
+			card6 += cards[11];
+
+		}
+		if (cards.length() >= 14) {
+			card7 += cards[12];
+			card7 += cards[13];
+
+		}
+
+
+
+		ofstream scrivi;
+		ofstream scrivi2;
+		double win = 0;
+		scrivi.open("ManualPrwin.txt");
+		scrivi2.open("ManualPrwinOPPL.txt");
+
+		scrivi << "//min hand " << card1 << card2 << " " << card3 << card4 << card5 << " " << card6 << card7 << endl;
+		scrivi2 << "//min hand " << card1 << card2 << " " << card3 << card4 << card5 << " " << card6 << card7 << endl;
+
+		scrivi << "switch (*ActivePlayer) {\n";
+
+		cout.precision(2);
+		scrivi.precision(2);
+		scrivi2.precision(2);
+
+		for (int i = 2; i <= 9; i++) {
+			prwin_calcolator* a = new prwin_calcolator;
+			scrivi << "   case " << i << ":\n";
+			win = a->calc_prwin(card1, card2, card3, card4, card5, card6, card7, i, iterations);
+			win -= 0.01;
+			delete a;
+			cout << card1 << card2 << " " << card3 << card4 << card5 << " " << card6 << card7 << " player = " << i << " prwin = " << win << endl << endl;
+			scrivi << "       if (prwin <= " << win << ") return false;\n       break;\n";
+			scrivi2 << "	WHEN Opponents = " << i - 1 << " AND prwin <= " << win << " RETURN false FORCE\n";
+			win = 0;
+
+		}
+		scrivi << "}\nreturn false;\n";
+		scrivi2 << "	WHEN Others RETURN false FORCE\n";
+
+		scrivi << endl;
+		scrivi2 << endl;
+		scrivi.close();
+		scrivi2.close();
+
+	}
+
+
+};
+void prwin_calcolator::findPrwinINVERSO() {
+#define resetcard card1 = "";card2 = "";card3 = "";card4 = "";card5 = "";card6 = "";card7 = "";
+	string card1 = "";
+	string card2 = "";
+	string card3 = "";
+	string card4 = "";
+	string card5 = "";
+	string card6 = "";
+	string card7 = "";
+	double prwin = 0;
+
+	string cards[100] = { "" };
+	bool fatto[100] = { false };
+
+	double targetprwin = .5;
+
+
+	int betround = 4;
+	int index = 0;
+	bool foundcard = true;
+
+	string cfile = "FindPrwinC++.txt";
+	string opplfile = "FindOppl.txt";
+
+	cout.precision(3);
+
+
+	while (1) {
+		if (foundcard) {
+		bet:
+			cout << "(INVERSO)\n";
+			cout << "Enter betround:\n";
+			cin >> betround;
+
+			if (betround <= 0 || betround > 4) {
+				cout << "ERROR!\n";
+				goto bet;
+			}
+
+		target:
+			cout << "Enter target prwin:\n";
+			cin >> targetprwin;
+
+			if (targetprwin <= 0 || targetprwin >= 1) {
+				cout << "ERROR!\n";
+				goto target;
+			}
+
+			foundcard = false;
+			cout << "searching cards..\n\n";
+		}
+
+
+		switch (betround) {
+		case 1:
+			card1 = NewDeck[rand() % 52];
+			card2 = NewDeck[rand() % 52];
+			if (card1 == card2)continue;
+
+			break;
+		case 2:
+			card1 = NewDeck[rand() % 52];
+			card2 = NewDeck[rand() % 52];
+			card3 = NewDeck[rand() % 52];
+			card4 = NewDeck[rand() % 52];
+			card5 = NewDeck[rand() % 52];
+			if (card1 == card2 || card1 == card3 || card1 == card4 || card1 == card5)continue;
+			if (card2 == card3 || card2 == card4 || card2 == card5)continue;
+			if (card3 == card4 || card3 == card5)continue;
+			if (card4 == card5)continue;
+			break;
+
+
+		case 3:
+			card1 = NewDeck[rand() % 52];
+			card2 = NewDeck[rand() % 52];
+			card3 = NewDeck[rand() % 52];
+			card4 = NewDeck[rand() % 52];
+			card5 = NewDeck[rand() % 52];
+			card6 = NewDeck[rand() % 52];
+			if (card1 == card2 || card1 == card3 || card1 == card4 || card1 == card5 || card1 == card6)continue;
+			if (card2 == card3 || card2 == card4 || card2 == card5 || card2 == card6)continue;
+			if (card3 == card4 || card3 == card5 || card3 == card6)continue;
+			if (card4 == card5 || card4 == card6)continue;
+			if (card5 == card6)continue;
+			break;
+		case 4:
+			card1 = NewDeck[rand() % 52];
+			card2 = NewDeck[rand() % 52];
+			card3 = NewDeck[rand() % 52];
+			card4 = NewDeck[rand() % 52];
+			card5 = NewDeck[rand() % 52];
+			card6 = NewDeck[rand() % 52];
+			card7 = NewDeck[rand() % 52];
+			if (card1 == card2 || card1 == card3 || card1 == card4 || card1 == card5 || card1 == card6 || card1 == card7)continue;
+			if (card2 == card3 || card2 == card4 || card2 == card5 || card2 == card6 || card2 == card7)continue;
+			if (card3 == card4 || card3 == card5 || card3 == card6 || card3 == card7)continue;
+			if (card4 == card5 || card4 == card6 || card4 == card7)continue;
+			if (card5 == card6 || card5 == card7)continue;
+			if (card6 == card7)continue;
+			break;
+		}
+		prwin = calc_prwin(card1, card2, card3, card4, card5, card6, card7, 2, 10000);
+
+
+		if (prwin > targetprwin) {
+			switch (betround) {
+			case 1:
+				if (prwin >= targetprwin && prwin < targetprwin + 0.01) {
+					GetPrwinAutoINVERSO(cfile, opplfile, card1, card2, "", "", "", "", "");
+					foundcard = true;
+					targetprwin = 0;
+					betround = 0;
+					resetcard
+				}
+				break;
+			case 2:
+
+				if (prwin >= targetprwin && prwin < targetprwin + 0.01) {
+					GetPrwinAutoINVERSO(cfile, opplfile, card1, card2, card3, card4, card5, "", "");
+					foundcard = true;
+					targetprwin = 0;
+					betround = 0;
+					resetcard
+				}
+				break;
+			case 3:
+				if (prwin >= targetprwin && prwin < targetprwin + 0.01) {
+					GetPrwinAutoINVERSO(cfile, opplfile, card1, card2, card3, card4, card5, card6, "");
+					foundcard = true;
+					targetprwin = 0;
+					betround = 0;
+					resetcard
+				}
+
+				break;
+			case 4:
+				if (prwin >= targetprwin && prwin < targetprwin + 0.01) {
+					GetPrwinAutoINVERSO(cfile, opplfile, card1, card2, card3, card4, card5, card6, card7);
+					foundcard = true;
+					targetprwin = 0;
+					betround = 0;
+					resetcard
+				}
+				break;
+			}
+		}
+
+
+		index++;
+
+	}
+
+};
+void prwin_calcolator::GetPrwinAutoINVERSO(string Cfile, string OpplFile, string card1, string card2, string card3, string card4, string card5, string card6, string card7) {
+	int iterations = 100000;
+
+	if (Cfile == "")Cfile = "ManualPrwinC++.txt";
+	if (OpplFile == "")OpplFile = "ManualPrwinOppl.txt";
+
+	ofstream scrivi;
+	ofstream scrivi2;
+
+	scrivi.precision(3);
+	scrivi2.precision(3);
+	cout.precision(3);
+
+	double win;
+	scrivi.open(Cfile);
+	scrivi2.open(OpplFile);
+
+	scrivi << "//min hand " << card1 << card2 << " " << card3 << card4 << card5 << " " << card6 << card7 << endl;
+	scrivi2 << "//min hand " << card1 << card2 << " " << card3 << card4 << card5 << " " << card6 << card7 << endl;
+
+	scrivi << "switch (*ActivePlayer) {\n";
+
+
+
+	for (int i = 2; i <= 9; i++) {
+		prwin_calcolator* a = new prwin_calcolator;
+		scrivi << "   case " << i << ":\n";
+		win = a->calc_prwin(card1, card2, card3, card4, card5, card6, card7, i, iterations);
+		win -= 0.01;
+		delete a;
+		cout << card1 << card2 << " " << card3 << card4 << card5 << " " << card6 << card7 << " player = " << i << " prwin = " << win << endl << endl;
+		scrivi << "       if (prwin <= " << win << ") return false;\n       break;\n";
+		scrivi2 << "	WHEN Opponents = " << i - 1 << " AND prwin <= " << win << " RETURN false FORCE\n";
+
+
+	}
+
+	scrivi << "}\nreturn false;\n";
+	scrivi2 << "	WHEN Others RETURN false FORCE\n";
+
+	scrivi << endl;
+	scrivi2 << endl;
+	scrivi.close();
+	scrivi2.close();
+
+
+
+
+};
+
+//write code on txt scripts
+void prwin_calcolator::WriteCodeForPreflopNumber() {
+	//return;
+	int number = 1;
+	ofstream write;
+	ifstream read;
+	write.open("txt/TEST.txt");
+
+	for (int i = 0; i < 13; i++) {
+		for (int j = i; j < 13; j++) {
+
+			if (i == j) {
+				write << "if (card1[0] == '" << Rank[i] << "' && card2[0] == '" << Rank[j] << "') {\npreflop_card1 = '" << Rank[i] << "';\npreflop_card2 = '" << Rank[j] <<"';\nnSuited = 1;\nreturn " << number << ";\n}\n";
+				cout << Rank[i] << Rank[j] << " number " << number << endl;
+				number++;
+			}
+			if (i != j) {
+				write << "if ((card1[0] == '" << Rank[i] << "' || card2[0] == '" << Rank[i] << "') && (card1[0] == '" << Rank[j] << "' || card2[0] == '" << Rank[j] << "')) {\npreflop_card1 = '" << Rank[i] << "';\npreflop_card2 = '" << Rank[j] << "';\nnSuited = 1;\nreturn " << number << ";\n}\n";
+				number++;
+				write << "if ((card1[0] == '" << Rank[i] << "' || card2[0] == '" << Rank[i] << "') && (card1[0] == '" << Rank[j] << "' || card2[0] == '" << Rank[j] << "') && card1[1] == card2[1]) {\npreflop_card1 = '" << Rank[i] << "' ;\npreflop_card2 = '" << Rank[j] << "';\nnSuited = 2;\nreturn " << number << ";\n}\n";
+				cout << Rank[i] << Rank[j] << "s number " << number << endl;
+				number++;
+			}
+		}
+	}
+	write.close();
+
+
+	exit(0);
+
+};
+void prwin_calcolator::WriteCodeForFlopNumber() {
+
+	int number = 1;
+	ofstream write;
+	ifstream read;
+	write.open("txt/TEST.txt");
+
+	for (int i = 0; i < 13; i++) {
+		for (int j = i; j < 13; j++) {
+			for (int k = j; k < 13; k++) {
+				if (i == j && j == k) {
+					write << "if (card1[0] == '" << Rank[i] << "' && card2[0] == '" << Rank[j] << "' && card3[0] == '" << Rank[k] << "') {\npreflop_card1 = '" << Rank[i] << "';\npreflop_card2 = '" << Rank[j] << "';\npreflop_card3 = '" << Rank[k] << "';\nnSuited = 1;\nreturn " << number << ";\n}\n";
+					cout << Rank[i] << Rank[j] << Rank[k] << " number " << number << endl;
+					number++;
+				}
+				if (i != j && j != k && i != k) {
+					write << "if ((card1[0] == '" << Rank[i] << "' || card2[0] == '" << Rank[i] << "' || card3[0] == '" << Rank[i] << "') && (card1[0] == '" << Rank[j] << "' || card2[0] == '" << Rank[j] << "' || card3[0] == '" << Rank[j] << "') && (card1[0] == '" << Rank[k] << "' || card2[0] == '" << Rank[k] << "' || card3[0] == '" << Rank[k] << "')) {\npreflop_card1 = '" << Rank[i] << "';\npreflop_card2 = '" << Rank[j] << "';\npreflop_card3 = '" << Rank[k] << "';\nnSuited = 1;\nreturn " << number << ";\n}\n";
+					number++;
+					write << "if (((card1[0] == '" << Rank[i] << "' && card2[0] == '" << Rank[j] << "') || (card1[0] == '" << Rank[j] << "' && card2[0] == '" << Rank[i] << "')) && (card3[0] == '" << Rank[k] << "' && card1[1] == card2[1] && card2[1] == card3[1])) {\npreflop_card1 = '" << Rank[i] << "' ;\npreflop_card2 = '" << Rank[j] << "';\npreflop_card3 = '" << Rank[k] << "';\nnSuited = 3;\nreturn " << number << ";\n}\n";
+					number++;
+					write << "if (((card1[0] == '" << Rank[i] << "' && card2[0] == '" << Rank[j] << "') || (card1[0] == '" << Rank[j] << "' && card2[0] == '" << Rank[i] << "')) && ((card1[0] == '" << Rank[k] << "' && card3[0]== '" << Rank[k] << "') || (card2[0] == '" << Rank[k] << "' && card3[0] == '" << Rank[j] << "') || (card1[0] == '" << Rank[k] << "' && card3[0] == '" << Rank[j] << "')) && card1[1] != card2[1] && card1[1] != card3[1] && card2[1] != card3[1]) {\npreflop_card1 = '" << Rank[i] << "'; \npreflop_card2 = '" << Rank[j] << "'; \npreflop_card3 = '" << Rank[k] << "'; \nnSuited = 2; \nreturn " << number << "; \n}\n";
+						number++;
+					write << "if (((card1[0] == '" << Rank[i] << "' && card2[0] == '" << Rank[k] << "') || (card1[0] == '" << Rank[k] << "' && card2[0] == '" << Rank[i] << "')) && ((card1[0] == '" << Rank[j] << "' && card3[0] == '" << Rank[j] << "') || (card2[0] == '" << Rank[j] << "' && card3[0] == '" << Rank[j] << "') || (card1[0] == '" << Rank[j] << "' && card3[0] == '" << Rank[k] << "')) && card1[1] != card2[1] && card1[1] != card3[1] && card2[1] != card3[1]) {\npreflop_card1 = '" << Rank[i] << "' ;\npreflop_card2 = '" << Rank[j] << "';\npreflop_card3 = '" << Rank[k] << "';\nnSuited = 2;\nreturn " << number << ";\n}\n";
+					number++;
+				}
+			}
+		}
+	}
+	write.close();
+
+}
+
+double prwin_calcolator::GetMinPrwinBasedOnStack(int _StackSize) {
+	if (_StackSize >= 200)return 0.4;
+
+	double diffBB = _StackSize - 100;
+
+	// Calcola la prwin regolata
+	double adjusted_prwin = 0.5 - (diffBB * 0.001);
+
+	return adjusted_prwin;
+
+}
+
+double prwin_calcolator::adjust_prwin(double prwin_single, int num_opponents, double k) {
+	return prwin_single * exp(-k * (num_opponents - 1));
+}
+
+enum BetRound { Preflop = 1, Flop, Turn, River };
+enum Action { None, Fold, Check, Call, Raise, Allin };
+enum StackSize { BigStack, MediumStack, ShortStack };
+
+void prwin_calcolator::generateCode() {
+	ofstream a;
+	a.open("generated code.txt");
+
+	auto writeposition = []() ->string {
+		string line = "";
+		line += "POSIZIONI\n";
+
+		return line;
+
+		};
+
+	a << "Switch(*Betround){\n";
+	for (int i = 1; i < 5; i++) {		
+		a << "	case " << i << ":\n";
+
+
+
+
+
+
+
+
+
+
+		a << "	break;\n\n";
+	}
+
+
+
+	a << "};//betround";
+
+
+
+
+	exit(0);
+}
